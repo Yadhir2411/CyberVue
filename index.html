@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CyberVue — Baseline Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+/* ─── DESIGN TOKENS ─────────────────────────────────────────────── */
+:root {
+  --bg:          #F0F2F7;
+  --surface:     #FFFFFF;
+  --surface-2:   #F7F9FC;
+  --border:      #E2E8F0;
+  --navy:        #0B1F4D;
+  --navy-light:  #1A3366;
+  --blue:        #2563EB;
+  --blue-light:  #3B82F6;
+  --blue-dim:    #EFF6FF;
+  --success:     #22C55E;
+  --success-dim: #F0FDF4;
+  --warning:     #F59E0B;
+  --warning-dim: #FFFBEB;
+  --danger:      #EF4444;
+  --danger-dim:  #FEF2F2;
+  --text-1:      #0F172A;
+  --text-2:      #475569;
+  --text-3:      #94A3B8;
+  --radius:      16px;
+  --radius-sm:   8px;
+  --radius-xs:   6px;
+  --shadow:      0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+  --shadow-md:   0 4px 6px rgba(0,0,0,.05), 0 10px 30px rgba(0,0,0,.08);
+  --shadow-lg:   0 20px 60px rgba(0,0,0,.12);
+  --font:        'Inter', sans-serif;
+  --mono:        'JetBrains Mono', monospace;
+  --transition:  all .2s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"] {
+  --bg:          #0A0F1E;
+  --surface:     #111827;
+  --surface-2:   #1A2235;
+  --border:      #1E2D45;
+  --navy:        #3B82F6;
+  --navy-light:  #60A5FA;
+  --blue-dim:    #1E3A5F;
+  --success-dim: #052E16;
+  --warning-dim: #451A03;
+  --danger-dim:  #450A0A;
+  --text-1:      #F1F5F9;
+  --text-2:      #94A3B8;
+  --text-3:      #475569;
+  --shadow:      0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.3);
+  --shadow-md:   0 4px 6px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.4);
+}
+
+/* ─── RESET & BASE ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-1);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; }
+button { cursor: pointer; font-family: var(--font); border: none; outline: none; }
+input, select, textarea { font-family: var(--font); }
+
+/* ─── UTILITIES ─────────────────────────────────────────────────── */
+.hidden   { display: none !important; }
+.flex     { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+.w-full { width: 100%; }
+.text-center { text-align: center; }
+
+/* ─── SCROLLBAR ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* ─── TOPBAR ────────────────────────────────────────────────────── */
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 60px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 32px;
+  z-index: 100;
+  gap: 12px;
+}
+.logo-mark {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, #0B1F4D, #2563EB);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.logo-mark svg { width: 18px; height: 18px; fill: #fff; }
+.logo-text {
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--navy);
+  letter-spacing: -.5px;
+}
+.logo-text span { color: var(--blue); }
+.topbar-spacer { flex: 1; }
+#darkToggle {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-2);
+  transition: var(--transition);
+  font-size: 16px;
+}
+#darkToggle:hover { background: var(--blue-dim); color: var(--blue); }
+
+/* ─── PAGE WRAPPER ──────────────────────────────────────────────── */
+.page { padding-top: 60px; min-height: 100vh; }
+
+/* ─── ── LANDING ─────────────────────────────────────────────────── */
+#landingPage {
+  display: flex; flex-direction: column;
+}
+
+/* Hero */
+.hero {
+  background: linear-gradient(135deg, #0B1F4D 0%, #1A3366 50%, #1E40AF 100%);
+  padding: 80px 32px 100px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 99px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #93C5FD;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  position: relative;
+}
+.hero-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: #4ADE80;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .6; transform: scale(1.3); }
+}
+.hero h1 {
+  font-size: clamp(32px, 5vw, 58px);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  position: relative;
+}
+.hero h1 span {
+  background: linear-gradient(90deg, #60A5FA, #818CF8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub {
+  font-size: clamp(15px, 2vw, 18px);
+  color: rgba(255,255,255,.7);
+  max-width: 560px;
+  margin: 0 auto 48px;
+  font-weight: 400;
+  line-height: 1.7;
+  position: relative;
+}
+.hero-features {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
+  margin-bottom: 48px;
+  position: relative;
+}
+.hero-feature {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: rgba(255,255,255,.85);
+  font-weight: 500;
+}
+.hero-feature .check { color: #4ADE80; font-size: 14px; }
+.hero-cta {
+  background: #fff;
+  color: #0B1F4D;
+  padding: 16px 40px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.2px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.3);
+  transition: var(--transition);
+  position: relative;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.hero-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+.hero-cta svg { width: 18px; height: 18px; }
+.hero-wave {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 60px; overflow: hidden;
+}
+.hero-wave svg { width: 100%; height: 100%; }
+
+/* Stats strip */
+.stats-strip {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 28px 32px;
+  display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
+}
+.stat-item { text-align: center; }
+.stat-number { font-size: 28px; font-weight: 800; color: var(--navy); letter-spacing: -1px; }
+.stat-label { font-size: 12px; font-weight: 500; color: var(--text-2); text-transform: uppercase; letter-spacing: .8px; margin-top: 2px; }
+
+/* Domain cards on landing */
+.landing-domains {
+  padding: 64px 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--blue);
+  margin-bottom: 10px;
+}
+.section-title {
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 800; letter-spacing: -.8px;
+  color: var(--text-1);
+  margin-bottom: 8px;
+}
+.section-sub {
+  font-size: 15px; color: var(--text-2); margin-bottom: 40px;
+  max-width: 540px;
+}
+.domain-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+.domain-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 28px;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+.domain-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.domain-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+.domain-num {
+  font-size: 11px; font-weight: 700; color: var(--text-3);
+  letter-spacing: 1px; text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.domain-card h3 {
+  font-size: 15px; font-weight: 700; color: var(--text-1);
+  margin-bottom: 6px;
+}
+.domain-card p { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+.domain-q-count {
+  margin-top: 16px;
+  font-size: 12px; font-weight: 600; color: var(--blue);
+  background: var(--blue-dim);
+  display: inline-block; padding: 3px 10px; border-radius: 99px;
+}
+
+/* Landing footer action */
+.landing-cta-section {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 64px 32px;
+  text-align: center;
+}
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: var(--transition);
+  box-shadow: 0 4px 14px rgba(37,99,235,.35);
+}
+.btn-primary:hover { background: #1D4ED8; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,.45); }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text-1);
+  border: 1px solid var(--border);
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: var(--transition);
+}
+.btn-secondary:hover { background: var(--surface-2); }
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: var(--transition);
+  border: 1px solid transparent;
+}
+.btn-ghost:hover { background: var(--surface-2); border-color: var(--border); }
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: var(--transition);
+}
+.btn-danger:hover { background: #DC2626; }
+
+/* ─── ASSESSMENT PAGE ───────────────────────────────────────────── */
+#assessmentPage {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 36px 24px 80px;
+}
+
+/* Progress header */
+.progress-header {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+.progress-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap; gap: 8px;
+}
+.progress-meta-left { display: flex; align-items: center; gap: 12px; }
+.domain-pill {
+  background: var(--blue-dim);
+  color: var(--blue);
+  font-size: 12px; font-weight: 700;
+  padding: 4px 12px; border-radius: 99px;
+  letter-spacing: .3px;
+}
+.domain-title-sm { font-size: 15px; font-weight: 700; color: var(--text-1); }
+.progress-meta-right { font-size: 13px; color: var(--text-2); font-weight: 500; }
+.progress-bar-wrap {
+  height: 6px; background: var(--border);
+  border-radius: 99px; overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), #818CF8);
+  border-radius: 99px;
+  transition: width .4s ease;
+}
+
+/* Domain nav dots */
+.domain-dots {
+  display: flex; gap: 6px; margin-top: 16px;
+  flex-wrap: wrap;
+}
+.domain-dot {
+  height: 4px; border-radius: 99px;
+  flex: 1; min-width: 30px;
+  background: var(--border);
+  transition: var(--transition);
+  cursor: default;
+}
+.domain-dot.active { background: var(--blue); }
+.domain-dot.completed { background: var(--success); }
+
+/* Question card */
+.question-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 32px 28px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  animation: slideIn .25s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.question-card:hover { border-color: #CBD5E1; }
+.question-card.answered { border-left: 3px solid var(--success); }
+.q-header {
+  display: flex; align-items: flex-start; gap: 14px;
+  margin-bottom: 20px;
+}
+.q-num {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 500;
+  color: var(--text-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 3px 8px; border-radius: 6px;
+  flex-shrink: 0; margin-top: 2px;
+}
+.q-meta { flex: 1; }
+.q-category {
+  font-size: 11px; font-weight: 700; color: var(--blue);
+  letter-spacing: .8px; text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.q-text {
+  font-size: 15px; font-weight: 600; color: var(--text-1);
+  line-height: 1.5;
+}
+.q-responses {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.resp-btn {
+  flex: 1; min-width: 90px;
+  padding: 11px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+  transition: var(--transition);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.resp-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); }
+.resp-btn.active-yes  { border-color: var(--success); background: var(--success-dim); color: #15803D; }
+.resp-btn.active-partial { border-color: var(--warning); background: var(--warning-dim); color: #92400E; }
+.resp-btn.active-no   { border-color: var(--danger);  background: var(--danger-dim);  color: #B91C1C; }
+
+/* Assessment nav */
+.assessment-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 32px; flex-wrap: wrap; gap: 12px;
+}
+.nav-center {
+  display: flex; gap: 8px; align-items: center;
+}
+.q-indicator {
+  font-size: 13px; color: var(--text-2); font-weight: 500;
+}
+
+/* ─── DASHBOARD PAGE ────────────────────────────────────────────── */
+#dashboardPage {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 36px 24px 80px;
+}
+
+/* Dashboard top actions */
+.dash-actions {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 10px; margin-bottom: 28px;
+  justify-content: space-between;
+}
+.dash-title-group h2 {
+  font-size: 22px; font-weight: 800; letter-spacing: -.5px;
+  color: var(--text-1);
+}
+.dash-title-group p { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+.dash-actions-right { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* KPI widgets */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.kpi-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.kpi-label { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+.kpi-value { font-size: 28px; font-weight: 900; letter-spacing: -1px; color: var(--text-1); }
+.kpi-value.score { color: var(--blue); }
+.kpi-sub { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+.kpi-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: 99px;
+  margin-top: 6px;
+}
+
+/* Charts grid */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+.charts-grid-3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+.chart-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.chart-card h3 {
+  font-size: 14px; font-weight: 700; color: var(--text-1);
+  margin-bottom: 4px;
+}
+.chart-card .chart-sub {
+  font-size: 12px; color: var(--text-2); margin-bottom: 20px;
+}
+.chart-wrap { position: relative; }
+.chart-wrap canvas { max-height: 260px; }
+
+/* Domain table */
+.domain-table-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.domain-table-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.domain-table-header h3 { font-size: 15px; font-weight: 700; color: var(--text-1); }
+.domain-table-header p { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th {
+  padding: 12px 24px;
+  font-size: 11px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .8px;
+  background: var(--surface-2);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 16px 24px;
+  font-size: 13px; color: var(--text-1);
+  border-bottom: 1px solid var(--border);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface-2); }
+.score-bar-mini {
+  display: flex; align-items: center; gap: 10px;
+}
+.score-bar-mini-track {
+  flex: 1; height: 6px; background: var(--border);
+  border-radius: 99px; overflow: hidden;
+}
+.score-bar-mini-fill { height: 100%; border-radius: 99px; }
+.score-badge {
+  font-weight: 700; font-size: 13px;
+  min-width: 40px; text-align: right;
+}
+.traffic-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  display: inline-block; margin-right: 6px;
+}
+.risk-pill {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 99px;
+  display: inline-block;
+}
+.risk-low    { background: var(--success-dim); color: #15803D; }
+.risk-medium { background: var(--warning-dim); color: #92400E; }
+.risk-high   { background: var(--danger-dim);  color: #B91C1C; }
+
+/* Heatmap */
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: 60px repeat(3,1fr);
+  grid-template-rows: repeat(4,1fr);
+  gap: 4px;
+  margin-top: 8px;
+}
+.hm-cell {
+  border-radius: 8px;
+  padding: 12px 8px;
+  text-align: center;
+  font-size: 11px; font-weight: 600;
+  min-height: 64px;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1.3;
+}
+.hm-label-row { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; }
+.hm-label-col { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; writing-mode: vertical-lr; transform: rotate(180deg); }
+.hm-empty { background: transparent; }
+.hm-low-low     { background: #DCFCE7; color: #15803D; }
+.hm-low-med     { background: #FEF9C3; color: #713F12; }
+.hm-low-high    { background: #FEF3C7; color: #92400E; }
+.hm-med-low     { background: #FEF9C3; color: #713F12; }
+.hm-med-med     { background: #FED7AA; color: #9A3412; }
+.hm-med-high    { background: #FEE2E2; color: #991B1B; }
+.hm-high-low    { background: #FEF3C7; color: #92400E; }
+.hm-high-med    { background: #FEE2E2; color: #991B1B; }
+.hm-high-high   { background: #FECACA; color: #7F1D1D; }
+[data-theme="dark"] .hm-low-low     { background: #052E16; color: #4ADE80; }
+[data-theme="dark"] .hm-low-med     { background: #422006; color: #FCD34D; }
+[data-theme="dark"] .hm-low-high    { background: #451A03; color: #FCA5A5; }
+[data-theme="dark"] .hm-med-low     { background: #422006; color: #FCD34D; }
+[data-theme="dark"] .hm-med-med     { background: #431407; color: #FB923C; }
+[data-theme="dark"] .hm-med-high    { background: #450A0A; color: #FCA5A5; }
+[data-theme="dark"] .hm-high-low    { background: #451A03; color: #FCA5A5; }
+[data-theme="dark"] .hm-high-med    { background: #450A0A; color: #FCA5A5; }
+[data-theme="dark"] .hm-high-high   { background: #3F0000; color: #F87171; }
+
+/* Recommendations */
+.recs-section {
+  margin-bottom: 28px;
+}
+.rec-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 20px 24px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  display: flex; gap: 16px; align-items: flex-start;
+  transition: var(--transition);
+}
+.rec-card:hover { border-color: #CBD5E1; }
+.rec-rank {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 700;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+  padding: 4px 8px; border-radius: 6px;
+  flex-shrink: 0;
+  min-width: 36px; text-align: center;
+}
+.rec-body { flex: 1; }
+.rec-meta {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;
+}
+.rec-domain-tag {
+  font-size: 11px; font-weight: 700; color: var(--blue);
+  background: var(--blue-dim); padding: 2px 8px; border-radius: 99px;
+}
+.rec-title { font-size: 14px; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
+.rec-detail { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+
+/* Executive report */
+#reportSection {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 48px;
+  box-shadow: var(--shadow);
+  margin-bottom: 28px;
+}
+.report-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 32px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 36px;
+  flex-wrap: wrap; gap: 20px;
+}
+.report-logo-group { display: flex; align-items: center; gap: 12px; }
+.report-logo-text { font-size: 20px; font-weight: 900; color: var(--navy); letter-spacing: -.5px; }
+.report-logo-text span { color: var(--blue); }
+.report-header-right { text-align: right; }
+.report-header-right .report-date { font-size: 12px; color: var(--text-3); }
+.report-header-right .report-ref {
+  font-family: var(--mono); font-size: 11px; color: var(--text-3);
+  margin-top: 2px;
+}
+.report-title { font-size: 26px; font-weight: 900; color: var(--text-1); letter-spacing: -.8px; margin-bottom: 6px; }
+.report-subtitle { font-size: 14px; color: var(--text-2); }
+.report-section { margin-bottom: 40px; }
+.report-section-title {
+  font-size: 16px; font-weight: 800; color: var(--navy);
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--blue);
+  margin-bottom: 20px;
+  letter-spacing: -.3px;
+}
+.report-narrative {
+  font-size: 14px; color: var(--text-2); line-height: 1.8;
+  background: var(--surface-2);
+  border-left: 3px solid var(--blue);
+  padding: 16px 20px;
+  border-radius: 0 8px 8px 0;
+}
+.report-domain-block {
+  background: var(--surface-2);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.report-domain-name { font-size: 14px; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
+.report-domain-score {
+  font-size: 24px; font-weight: 900; color: var(--blue);
+  letter-spacing: -1px; margin-bottom: 12px;
+}
+.report-domain-row { display: flex; gap: 20px; flex-wrap: wrap; }
+.report-domain-col { flex: 1; min-width: 200px; }
+.report-col-label { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+.report-col-text { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+.report-rec-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.report-rec-item:last-child { border-bottom: none; }
+.report-rec-num {
+  font-family: var(--mono); font-size: 11px;
+  background: var(--blue-dim); color: var(--blue);
+  padding: 3px 7px; border-radius: 6px;
+  font-weight: 700; flex-shrink: 0;
+}
+.report-rec-body { flex: 1; }
+.report-rec-title { font-size: 13px; font-weight: 700; color: var(--text-1); margin-bottom: 3px; }
+.report-rec-detail { font-size: 12px; color: var(--text-2); }
+.report-footer {
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px;
+}
+.report-footer-text { font-size: 11px; color: var(--text-3); }
+.report-confidential {
+  font-size: 11px; font-weight: 700;
+  color: var(--danger);
+  background: var(--danger-dim);
+  padding: 4px 10px; border-radius: 99px;
+}
+
+/* Maturity level badge */
+.maturity-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 99px;
+  font-size: 13px; font-weight: 700;
+}
+
+/* ─── ALERTS / TOAST ────────────────────────────────────────────── */
+#toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--text-1); color: #fff;
+  padding: 12px 20px; border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  z-index: 999;
+  transition: var(--transition);
+  transform: translateY(80px); opacity: 0;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+
+/* ─── RESPONSIVE ────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .charts-grid, .charts-grid-3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  #topbar { padding: 0 16px; }
+  .hero { padding: 56px 16px 80px; }
+  .stats-strip { gap: 24px; padding: 24px 16px; }
+  .landing-domains { padding: 40px 16px; }
+  #assessmentPage { padding: 24px 12px 60px; }
+  #dashboardPage { padding: 24px 12px 60px; }
+  #reportSection { padding: 24px 16px; }
+  .q-responses { flex-direction: column; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .domain-table-card { overflow-x: auto; }
+  .assessment-nav { flex-direction: column; gap: 10px; }
+}
+@media print {
+  #topbar, .dash-actions-right, .btn-primary, .btn-secondary, .btn-ghost, .btn-danger { display: none !important; }
+  #reportSection { box-shadow: none; border: none; padding: 0; }
+  .page { padding-top: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── TOPBAR ─────────────────────────────────────────────────────── -->
+<nav id="topbar">
+  <div class="logo-mark">
+    <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+  </div>
+  <span class="logo-text">Cyber<span>Vue</span></span>
+  <div class="topbar-spacer"></div>
+  <button id="darkToggle" title="Toggle dark mode">🌙</button>
+</nav>
+
+<!-- ── TOAST ──────────────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- LANDING PAGE                                                     -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<div id="landingPage" class="page">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">Cybersecurity Posture Assessment</div>
+    <h1>CyberVue<br/><span>Baseline Assessment</span></h1>
+    <p class="hero-sub">Evaluate your organisation's cybersecurity posture across six critical security domains. Get an executive report in under 10 minutes.</p>
+    <div class="hero-features">
+      <div class="hero-feature"><span class="check">✓</span> 60 Questions</div>
+      <div class="hero-feature"><span class="check">✓</span> 6 Security Domains</div>
+      <div class="hero-feature"><span class="check">✓</span> Executive Report</div>
+      <div class="hero-feature"><span class="check">✓</span> Immediate Results</div>
+      <div class="hero-feature"><span class="check">✓</span> No Registration</div>
+      <div class="hero-feature"><span class="check">✓</span> PDF Export</div>
+    </div>
+    <button class="hero-cta" onclick="App.startAssessment()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>
+      Start Assessment
+    </button>
+    <div class="hero-wave">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="var(--bg)"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Stats strip -->
+  <div class="stats-strip">
+    <div class="stat-item"><div class="stat-number">60</div><div class="stat-label">Questions</div></div>
+    <div class="stat-item"><div class="stat-number">6</div><div class="stat-label">Domains</div></div>
+    <div class="stat-item"><div class="stat-number">~10</div><div class="stat-label">Minutes</div></div>
+    <div class="stat-item"><div class="stat-number">5</div><div class="stat-label">Maturity Levels</div></div>
+    <div class="stat-item"><div class="stat-number">∞</div><div class="stat-label">Insights</div></div>
+  </div>
+
+  <!-- Domain cards -->
+  <div class="landing-domains">
+    <div class="section-label">Assessment Domains</div>
+    <h2 class="section-title">Six Critical Security Areas</h2>
+    <p class="section-sub">Each domain contains 10 questions, scored across a proven cybersecurity maturity framework.</p>
+    <div class="domain-grid" id="landingDomainCards"></div>
+  </div>
+
+  <!-- Bottom CTA -->
+  <div class="landing-cta-section">
+    <div class="section-label">Ready to begin?</div>
+    <h2 class="section-title" style="margin-bottom:12px;">Measure. Understand. Improve.</h2>
+    <p style="color:var(--text-2);font-size:15px;margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;">Start your free baseline assessment and receive an executive-grade cybersecurity report instantly.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-primary" onclick="App.startAssessment()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>
+        Start Assessment
+      </button>
+      <label class="btn-secondary" style="cursor:pointer;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Import Previous Results
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="App.importResults(event)"/>
+      </label>
+    </div>
+  </div>
+
+</div><!-- /landingPage -->
+
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- ASSESSMENT PAGE                                                  -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<div id="assessmentPage" class="page hidden">
+
+  <div class="progress-header">
+    <div class="progress-meta">
+      <div class="progress-meta-left">
+        <div class="domain-pill" id="domainPill">Domain 1 of 6</div>
+        <div class="domain-title-sm" id="domainTitleSm">Governance &amp; Risk</div>
+      </div>
+      <div class="progress-meta-right" id="progressText">Question 1 of 60</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="domain-dots" id="domainDots"></div>
+  </div>
+
+  <div id="questionContainer"></div>
+
+  <div class="assessment-nav">
+    <button class="btn-secondary" id="btnPrevDomain" onclick="App.prevDomain()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg>
+      Previous Domain
+    </button>
+    <div class="nav-center">
+      <span class="q-indicator" id="qIndicator"></span>
+    </div>
+    <button class="btn-primary" id="btnNextDomain" onclick="App.nextDomain()">
+      Next Domain
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>
+    </button>
+  </div>
+
+</div><!-- /assessmentPage -->
+
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- DASHBOARD PAGE                                                   -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<div id="dashboardPage" class="page hidden">
+
+  <div class="dash-actions">
+    <div class="dash-title-group">
+      <h2>Cybersecurity Assessment Report</h2>
+      <p id="reportDateLine">Generated on —</p>
+    </div>
+    <div class="dash-actions-right">
+      <button class="btn-ghost" onclick="App.retakeAssessment()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 .49-3.87"/></svg>
+        Retake
+      </button>
+      <button class="btn-ghost" onclick="App.exportJSON()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export JSON
+      </button>
+      <button class="btn-ghost" onclick="window.print()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print
+      </button>
+      <button class="btn-primary" onclick="App.exportPDF()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        Export PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI widgets -->
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <!-- Charts row 1: bar + radar + doughnut -->
+  <div class="charts-grid-3" id="chartsRow1">
+    <div class="chart-card">
+      <h3>Domain Maturity Scores</h3>
+      <p class="chart-sub">Score per security domain (out of 100)</p>
+      <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Posture Radar</h3>
+      <p class="chart-sub">Six-domain coverage overview</p>
+      <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Overall Maturity</h3>
+      <p class="chart-sub">Aggregate score distribution</p>
+      <div class="chart-wrap" style="max-width:200px;margin:0 auto;"><canvas id="doughnutChart"></canvas></div>
+      <div id="doughnutLabel" style="text-align:center;margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <!-- Charts row 2: heatmap + domain table -->
+  <div class="charts-grid" id="chartsRow2">
+    <div class="chart-card">
+      <h3>Risk Heatmap</h3>
+      <p class="chart-sub">Domain risk positioning by likelihood vs impact</p>
+      <div id="heatmapWrap"></div>
+    </div>
+    <div class="chart-card">
+      <h3>Traffic Light Status</h3>
+      <p class="chart-sub">Domain-level pass / review / attention indicators</p>
+      <div id="trafficLightWrap" style="margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <!-- Domain results table -->
+  <div class="domain-table-card">
+    <div class="domain-table-header">
+      <h3>Domain Results Summary</h3>
+      <p>Detailed breakdown of scores, maturity levels, and risk ratings</p>
+    </div>
+    <table id="domainTable"></table>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="recs-section">
+    <div class="section-label" style="margin-bottom:8px;">Prioritised Recommendations</div>
+    <h2 class="section-title" style="margin-bottom:4px;">Top 10 Actions</h2>
+    <p style="color:var(--text-2);font-size:13px;margin-bottom:20px;">Ranked by severity and impact. Address high-priority items first.</p>
+    <div id="recsContainer"></div>
+  </div>
+
+  <!-- Executive Report -->
+  <div id="reportSection">
+    <div class="report-header">
+      <div>
+        <div class="report-logo-group">
+          <div class="logo-mark" style="width:40px;height:40px;">
+            <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#fff;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+          </div>
+          <div class="report-logo-text">Cyber<span>Vue</span></div>
+        </div>
+        <div style="margin-top:20px;">
+          <div class="report-title">Cybersecurity Baseline Assessment Report</div>
+          <div class="report-subtitle">Confidential — Executive Summary for Board and Leadership</div>
+        </div>
+      </div>
+      <div class="report-header-right">
+        <div class="report-date" id="reportDate"></div>
+        <div class="report-ref" id="reportRef"></div>
+      </div>
+    </div>
+
+    <div class="report-section" id="rptExecutiveSummary"></div>
+    <div class="report-section" id="rptOverallResults"></div>
+    <div class="report-section" id="rptDomainAnalysis"></div>
+    <div class="report-section" id="rptRecommendations"></div>
+
+    <div class="report-footer">
+      <div class="report-footer-text">CyberVue Baseline Assessment &mdash; Measure. Understand. Improve.</div>
+      <div class="report-confidential">CONFIDENTIAL</div>
+    </div>
+  </div>
+
+</div><!-- /dashboardPage -->
+
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- APPLICATION JAVASCRIPT                                           -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script>
+/* ──────────────────────────────────────────────────────────────────
+   DATA: 60 questions across 6 domains
+   ────────────────────────────────────────────────────────────────── */
+const domains = [
+  {
+    name: "Governance & Risk",
+    description: "Measures leadership, policy, accountability, and security risk management.",
+    icon: "🏛️",
+    color: "#6366F1",
+    questions: [
+      { id: "Q1",  category: "Policy Governance",       text: "Does your organisation maintain a formally approved information security policy?" },
+      { id: "Q2",  category: "Governance Structure",    text: "Is cybersecurity responsibility clearly assigned to a senior individual or function?" },
+      { id: "Q3",  category: "Asset Management",        text: "Are information assets formally inventoried?" },
+      { id: "Q4",  category: "Risk Management",         text: "Does the organisation perform periodic cybersecurity risk assessments?" },
+      { id: "Q5",  category: "Risk Governance",         text: "Are cybersecurity risks formally tracked and reviewed by management?" },
+      { id: "Q6",  category: "Security Awareness",      text: "Are employees provided with cybersecurity awareness training?" },
+      { id: "Q7",  category: "Policy Management",       text: "Are security policies reviewed and updated at least annually?" },
+      { id: "Q8",  category: "Governance Structure",    text: "Are roles and responsibilities for cybersecurity formally documented?" },
+      { id: "Q9",  category: "Compliance Monitoring",   text: "Does the organisation track compliance with its cybersecurity policies?" },
+      { id: "Q10", category: "Risk Integration",        text: "Are major IT or digital initiatives subject to cybersecurity risk review?" }
+    ],
+    recommendations: {
+      Q1:  { title: "Develop a Formal Information Security Policy",        detail: "Establish and gain executive approval for a comprehensive information security policy covering all critical areas." },
+      Q2:  { title: "Assign a Dedicated Cybersecurity Accountability Role", detail: "Designate a CISO or equivalent senior role with clear accountability for cybersecurity governance." },
+      Q3:  { title: "Create a Formal Information Asset Inventory",          detail: "Implement an asset register covering hardware, software, data, and cloud assets with ownership assigned." },
+      Q4:  { title: "Implement Periodic Cybersecurity Risk Assessments",   detail: "Schedule formal risk assessments at least annually, with processes to identify, evaluate, and treat risks." },
+      Q5:  { title: "Establish a Risk Register with Management Review",     detail: "Maintain a live risk register and schedule regular management review cycles to ensure risks are tracked." },
+      Q6:  { title: "Deploy a Cybersecurity Awareness Training Programme",  detail: "Implement role-based security awareness training for all staff at least annually." },
+      Q7:  { title: "Implement Policy Review Cycles",                       detail: "Establish an annual review calendar for all security policies, with documented approvals." },
+      Q8:  { title: "Document RACI Matrix for Cybersecurity Roles",         detail: "Define and document responsibilities and accountabilities across all cybersecurity functions." },
+      Q9:  { title: "Introduce Compliance Monitoring and Reporting",        detail: "Deploy a compliance tracking mechanism to measure adherence to security policies." },
+      Q10: { title: "Embed Cyber Risk Review into IT Project Lifecycle",    detail: "Mandate a security review gate for all significant IT changes, projects, and digital initiatives." }
+    }
+  },
+  {
+    name: "Identity & Access Management",
+    description: "Measures identity governance, authentication strength, privilege control, and access lifecycle management.",
+    icon: "🔐",
+    color: "#0EA5E9",
+    questions: [
+      { id: "Q11", category: "Identity Management",     text: "Are unique user accounts required for all system users?" },
+      { id: "Q12", category: "Authentication Security", text: "Is multi-factor authentication implemented for critical systems or remote access?" },
+      { id: "Q13", category: "Privileged Access",       text: "Are privileged or administrative accounts restricted to authorised personnel only?" },
+      { id: "Q14", category: "Access Review",           text: "Are user access rights reviewed periodically?" },
+      { id: "Q15", category: "Identity Lifecycle",      text: "Is access removed promptly when employees leave the organisation?" },
+      { id: "Q16", category: "Identity Governance",     text: "Are shared or generic user accounts avoided or tightly controlled?" },
+      { id: "Q17", category: "Authentication Security", text: "Are password requirements enforced through technical controls?" },
+      { id: "Q18", category: "Privileged Monitoring",   text: "Are administrative activities logged and monitored?" },
+      { id: "Q19", category: "Remote Access Security",  text: "Is remote access to corporate systems secured through approved mechanisms such as VPN?" },
+      { id: "Q20", category: "Privileged Governance",   text: "Are privileged access activities periodically reviewed?" }
+    ],
+    recommendations: {
+      Q11: { title: "Enforce Unique User Account Policy",                   detail: "Mandate individual accounts for every user and prohibit account sharing through technical enforcement." },
+      Q12: { title: "Deploy Multi-Factor Authentication",                   detail: "Implement MFA across all critical systems, privileged accounts, and remote access channels." },
+      Q13: { title: "Restrict Privileged Account Access",                   detail: "Apply least-privilege principles with formal approval workflows for all privileged account requests." },
+      Q14: { title: "Establish Quarterly Access Reviews",                   detail: "Schedule periodic access certification reviews to identify and remove inappropriate access rights." },
+      Q15: { title: "Automate Offboarding Access Revocation",               detail: "Implement automated or same-day processes to revoke system access upon employee departure." },
+      Q16: { title: "Eliminate or Govern Shared Accounts",                  detail: "Identify and eliminate shared accounts; where unavoidable, apply strict controls and logging." },
+      Q17: { title: "Enforce Password Complexity via Technical Controls",   detail: "Deploy password policies enforced at the system level covering minimum length, complexity, and rotation." },
+      Q18: { title: "Enable Privileged Activity Logging and Monitoring",    detail: "Implement SIEM or PAM tooling to capture and alert on administrative and privileged activities." },
+      Q19: { title: "Secure Remote Access with Approved VPN or ZTNA",      detail: "Deploy and enforce VPN or zero-trust network access for all remote connectivity to corporate systems." },
+      Q20: { title: "Implement Privileged Access Review Process",           detail: "Introduce formal periodic reviews of all privileged accounts, including service accounts and admin roles." }
+    }
+  },
+  {
+    name: "Technology & Operations",
+    description: "Measures the security of infrastructure, endpoints, patching, monitoring, and operational control discipline.",
+    icon: "⚙️",
+    color: "#10B981",
+    questions: [
+      { id: "Q21", category: "Patch Management",        text: "Are operating systems and software regularly updated with security patches?" },
+      { id: "Q22", category: "Endpoint Security",       text: "Is endpoint protection deployed on organisational devices?" },
+      { id: "Q23", category: "Network Security",        text: "Are network security controls such as firewalls or filtering implemented?" },
+      { id: "Q24", category: "Security Monitoring",     text: "Are systems monitored for suspicious activity or security events?" },
+      { id: "Q25", category: "Vulnerability Management",text: "Are vulnerability scans or security assessments performed periodically?" },
+      { id: "Q26", category: "Backup Management",       text: "Are critical systems backed up regularly?" },
+      { id: "Q27", category: "Disaster Recovery",       text: "Are backup systems periodically tested to ensure recoverability?" },
+      { id: "Q28", category: "Infrastructure Security", text: "Are administrative interfaces restricted from public exposure where possible?" },
+      { id: "Q29", category: "Secure Configuration",    text: "Are secure configuration standards applied to servers and infrastructure?" },
+      { id: "Q30", category: "Technology Lifecycle",    text: "Are obsolete systems or unsupported software actively managed or retired?" }
+    ],
+    recommendations: {
+      Q21: { title: "Establish a Formal Patch Management Programme",        detail: "Deploy automated patching tools and define SLAs for critical patch application within 30 days." },
+      Q22: { title: "Deploy Next-Generation Endpoint Protection",           detail: "Implement EDR/XDR solutions across all endpoints with centralised management and alerting." },
+      Q23: { title: "Implement Network Segmentation and Firewall Controls", detail: "Deploy perimeter and internal firewalls with rule reviews and network segmentation strategies." },
+      Q24: { title: "Deploy a SIEM or Security Monitoring Platform",       detail: "Implement centralised log collection and alerting to detect suspicious activities in real time." },
+      Q25: { title: "Conduct Regular Vulnerability Scanning",              detail: "Schedule automated vulnerability scans monthly and penetration tests annually against key systems." },
+      Q26: { title: "Implement a Comprehensive Backup Strategy",           detail: "Apply 3-2-1 backup principles covering all critical systems with offsite or cloud replication." },
+      Q27: { title: "Test Backup Recovery Procedures Regularly",           detail: "Schedule quarterly restore tests with documented recovery time objectives and results." },
+      Q28: { title: "Restrict and Harden Administrative Interfaces",       detail: "Remove public exposure of admin panels; restrict management access to dedicated networks." },
+      Q29: { title: "Apply CIS Hardening Benchmarks",                      detail: "Adopt CIS or equivalent hardening standards for all server, network, and endpoint configurations." },
+      Q30: { title: "Manage End-of-Life Technology Risk",                  detail: "Maintain a technology lifecycle register and implement a decommission plan for unsupported systems." }
+    }
+  },
+  {
+    name: "Data Protection & Privacy",
+    description: "Measures how sensitive and personal data is identified, protected, accessed, retained, and governed.",
+    icon: "🛡️",
+    color: "#F59E0B",
+    questions: [
+      { id: "Q31", category: "Data Classification",     text: "Does the organisation classify sensitive or confidential data?" },
+      { id: "Q32", category: "Encryption Controls",     text: "Is personal or sensitive data protected through encryption when stored or transmitted?" },
+      { id: "Q33", category: "Data Lifecycle",          text: "Are data retention requirements defined and enforced?" },
+      { id: "Q34", category: "Privacy Awareness",       text: "Are employees trained on handling sensitive or personal information?" },
+      { id: "Q35", category: "Data Access Control",     text: "Are access controls applied to restrict sensitive data access?" },
+      { id: "Q36", category: "Third Party Privacy",     text: "Are third parties required to protect personal or sensitive data contractually?" },
+      { id: "Q37", category: "Privacy Governance",      text: "Are privacy or data protection obligations formally documented?" },
+      { id: "Q38", category: "Data Subject Rights",     text: "Are procedures in place to respond to data subject requests such as access or deletion?" },
+      { id: "Q39", category: "Data Minimisation",       text: "Are systems designed to minimise unnecessary collection of personal data?" },
+      { id: "Q40", category: "Data Access Monitoring",  text: "Are logs or records maintained for significant access to sensitive information?" }
+    ],
+    recommendations: {
+      Q31: { title: "Implement a Data Classification Framework",            detail: "Define classification tiers (e.g., Public, Internal, Confidential, Restricted) and train staff on proper handling." },
+      Q32: { title: "Deploy Encryption at Rest and in Transit",             detail: "Enforce TLS for all data in transit and AES-256 encryption for sensitive data at rest." },
+      Q33: { title: "Define and Enforce Data Retention Policies",           detail: "Document retention schedules by data type and automate deletion at end-of-retention periods." },
+      Q34: { title: "Deliver Privacy and Data Handling Training",           detail: "Include data protection in onboarding and annual security training, with role-specific guidance." },
+      Q35: { title: "Apply Role-Based Access to Sensitive Data",            detail: "Implement RBAC controls ensuring access to sensitive datasets is granted on a need-to-know basis." },
+      Q36: { title: "Include Data Protection Clauses in Vendor Contracts",  detail: "Require DPAs and security obligations in all contracts involving personal or sensitive data." },
+      Q37: { title: "Document Privacy Obligations and Register of Processing", detail: "Maintain a record of processing activities and map all personal data flows across the organisation." },
+      Q38: { title: "Establish a Data Subject Rights Procedure",            detail: "Implement a formal process with SLAs to handle DSAR requests within regulatory timeframes." },
+      Q39: { title: "Adopt Data Minimisation Principles in System Design",  detail: "Review systems to remove unnecessary data collection fields and implement privacy by design." },
+      Q40: { title: "Enable Audit Logging for Sensitive Data Access",       detail: "Implement audit trails for all access to personal and sensitive data, with regular review processes." }
+    }
+  },
+  {
+    name: "Incident Response & Resilience",
+    description: "Measures preparedness to detect, respond to, recover from, and learn from cyber incidents.",
+    icon: "🚨",
+    color: "#EF4444",
+    questions: [
+      { id: "Q41", category: "Incident Response Governance", text: "Does the organisation maintain a documented incident response procedure?" },
+      { id: "Q42", category: "Incident Awareness",       text: "Are employees trained to recognise and report potential security incidents?" },
+      { id: "Q43", category: "Incident Tracking",        text: "Are security incidents logged and tracked when they occur?" },
+      { id: "Q44", category: "Incident Governance",      text: "Does the organisation have defined escalation procedures for cyber incidents?" },
+      { id: "Q45", category: "Backup Security",          text: "Are backups stored in a manner protected from ransomware or compromise?" },
+      { id: "Q46", category: "Business Continuity",      text: "Are disaster recovery procedures defined for critical systems?" },
+      { id: "Q47", category: "Incident Testing",         text: "Are incident response procedures periodically tested or simulated?" },
+      { id: "Q48", category: "Incident Learning",        text: "Are cybersecurity incidents reviewed to identify root causes and improvements?" },
+      { id: "Q49", category: "Crisis Communication",     text: "Are communication plans defined for significant incidents?" },
+      { id: "Q50", category: "Continuous Improvement",   text: "Are lessons learned from incidents incorporated into security improvements?" }
+    ],
+    recommendations: {
+      Q41: { title: "Develop a Formal Incident Response Plan",              detail: "Document an IRP covering detection, containment, eradication, recovery, and post-incident review phases." },
+      Q42: { title: "Train Staff in Incident Recognition and Reporting",    detail: "Include incident reporting procedures in security awareness training with clear escalation paths." },
+      Q43: { title: "Implement Incident Logging and Ticketing",             detail: "Deploy a security incident ticketing system to log, categorise, and track all incidents to closure." },
+      Q44: { title: "Define Incident Escalation and Severity Matrix",       detail: "Create a severity classification matrix with defined escalation paths, roles, and response timelines." },
+      Q45: { title: "Implement Immutable or Offline Backup Storage",        detail: "Store backups in air-gapped, immutable, or offline environments to protect against ransomware attacks." },
+      Q46: { title: "Develop Disaster Recovery Plans for Critical Systems", detail: "Document RTOs and RPOs for all critical systems with tested recovery runbooks." },
+      Q47: { title: "Conduct Tabletop Exercises and Incident Simulations",  detail: "Schedule annual tabletop exercises simulating realistic attack scenarios to test response readiness." },
+      Q48: { title: "Implement Post-Incident Review Process",               detail: "Require formal root cause analysis for all significant incidents, with documented improvement actions." },
+      Q49: { title: "Develop Incident Communication and Crisis Plans",      detail: "Document internal and external communication protocols, including regulatory notification timelines." },
+      Q50: { title: "Establish a Lessons Learned Feedback Loop",            detail: "Integrate incident findings into policy updates, training content, and technical control improvements." }
+    }
+  },
+  {
+    name: "Third-Party & Supply Chain Risk",
+    description: "Measures how supplier, vendor, cloud, and integration risks are identified and managed.",
+    icon: "🔗",
+    color: "#8B5CF6",
+    questions: [
+      { id: "Q51", category: "Vendor Risk Management",  text: "Are cybersecurity risks considered when selecting technology vendors?" },
+      { id: "Q52", category: "Vendor Security",         text: "Are vendors required to adhere to security or data protection requirements?" },
+      { id: "Q53", category: "Vendor Governance",       text: "Are vendor agreements reviewed for security and privacy obligations?" },
+      { id: "Q54", category: "Vendor Inventory",        text: "Does the organisation maintain a register of key suppliers and service providers?" },
+      { id: "Q55", category: "Vendor Risk Assessment",  text: "Are high-risk vendors subject to additional security due diligence?" },
+      { id: "Q56", category: "Integration Security",    text: "Are third-party system integrations reviewed for security risks?" },
+      { id: "Q57", category: "Vendor Incident Management", text: "Are vendors required to notify the organisation of security incidents?" },
+      { id: "Q58", category: "Vendor Access Control",   text: "Are vendor access rights restricted to only what is necessary?" },
+      { id: "Q59", category: "Cloud Governance",        text: "Are cloud service providers evaluated for security certifications or controls?" },
+      { id: "Q60", category: "Vendor Monitoring",       text: "Are critical suppliers periodically reassessed for cybersecurity risk?" }
+    ],
+    recommendations: {
+      Q51: { title: "Embed Cyber Risk in Vendor Selection Criteria",        detail: "Include security questionnaires and scoring in vendor onboarding and procurement processes." },
+      Q52: { title: "Define Minimum Security Requirements for Vendors",     detail: "Create baseline security standards vendors must meet, with contractual enforcement mechanisms." },
+      Q53: { title: "Review and Update Vendor Agreements for Security Clauses", detail: "Audit existing contracts and ensure security, privacy, and incident reporting clauses are included." },
+      Q54: { title: "Build and Maintain a Supplier Register",               detail: "Create a register of all key suppliers with risk tier classifications, data access, and criticality ratings." },
+      Q55: { title: "Conduct Enhanced Due Diligence on High-Risk Vendors",  detail: "Perform security assessments, review certifications (ISO 27001, SOC 2), and conduct on-site reviews." },
+      Q56: { title: "Review Third-Party Integration Security",              detail: "Assess API and integration security for all third-party connections, applying least-privilege data sharing." },
+      Q57: { title: "Mandate Vendor Security Incident Notification",        detail: "Include contractual obligations for vendors to notify the organisation within defined timeframes." },
+      Q58: { title: "Restrict and Monitor Vendor Access",                   detail: "Apply just-in-time access for vendors with logging, time limits, and regular access reviews." },
+      Q59: { title: "Evaluate Cloud Provider Security Posture",             detail: "Assess CSP certifications (ISO 27001, SOC 2, CSA STAR) and shared responsibility model obligations." },
+      Q60: { title: "Implement Annual Vendor Reassessment Programme",       detail: "Schedule periodic reassessments of critical vendors, including updated security questionnaires." }
+    }
+  }
+];
+
+/* ──────────────────────────────────────────────────────────────────
+   MATURITY BANDS
+   ────────────────────────────────────────────────────────────────── */
+const maturityBands = [
+  { level: 1, name: "Initial",    min: 0,  max: 20,  color: "#EF4444", bg: "#FEF2F2", text: "#B91C1C" },
+  { level: 2, name: "Developing", min: 21, max: 40,  color: "#F59E0B", bg: "#FFFBEB", text: "#92400E" },
+  { level: 3, name: "Defined",    min: 41, max: 60,  color: "#EAB308", bg: "#FEF9C3", text: "#713F12" },
+  { level: 4, name: "Managed",    min: 61, max: 80,  color: "#22C55E", bg: "#F0FDF4", text: "#15803D" },
+  { level: 5, name: "Optimized",  min: 81, max: 100, color: "#16A34A", bg: "#DCFCE7", text: "#14532D" }
+];
+
+/* ──────────────────────────────────────────────────────────────────
+   HEATMAP POSITIONING LOGIC
+   likelihood (1=low,2=med,3=high) × impact (1=low,2=med,3=high)
+   ────────────────────────────────────────────────────────────────── */
+function getDomainHeatmapPosition(score) {
+  // Lower score = higher likelihood and higher impact
+  if (score >= 80) return { l: 1, i: 1 };       // low/low
+  if (score >= 70) return { l: 1, i: 2 };       // low/med
+  if (score >= 60) return { l: 2, i: 1 };       // med/low
+  if (score >= 50) return { l: 2, i: 2 };       // med/med
+  if (score >= 40) return { l: 2, i: 3 };       // med/high
+  if (score >= 30) return { l: 3, i: 2 };       // high/med
+  return             { l: 3, i: 3 };             // high/high
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   APP STATE
+   ────────────────────────────────────────────────────────────────── */
+const App = (() => {
+  const STORAGE_KEY = 'cybervue_v2';
+  let responses    = {};     // { "Q1": "yes"|"partial"|"no", ... }
+  let currentDomain = 0;     // 0–5
+  let charts       = {};
+  let darkMode     = false;
+
+  /* ── helpers ──────────────────────────────────────────────────── */
+  function getMaturity(pct) {
+    return maturityBands.find(b => pct <= b.max) || maturityBands[4];
+  }
+  function domainScore(dIdx) {
+    const qs = domains[dIdx].questions;
+    let pts = 0;
+    qs.forEach(q => {
+      const r = responses[q.id];
+      if (r === 'yes') pts += 10;
+      else if (r === 'partial') pts += 5;
+    });
+    return pts; // 0–100
+  }
+  function answeredInDomain(dIdx) {
+    return domains[dIdx].questions.filter(q => responses[q.id]).length;
+  }
+  function totalAnswered() {
+    return Object.keys(responses).length;
+  }
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(responses)); } catch(e){}
+  }
+  function load() {
+    try {
+      const s = localStorage.getItem(STORAGE_KEY);
+      if (s) { responses = JSON.parse(s); return true; }
+    } catch(e){}
+    return false;
+  }
+  function showToast(msg, duration=3000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+  }
+  function showPage(id) {
+    ['landingPage','assessmentPage','dashboardPage'].forEach(p => {
+      document.getElementById(p).classList.toggle('hidden', p !== id);
+    });
+    window.scrollTo(0, 0);
+  }
+
+  /* ── LANDING ──────────────────────────────────────────────────── */
+  function renderLandingCards() {
+    const c = document.getElementById('landingDomainCards');
+    c.innerHTML = domains.map((d, i) => `
+      <div class="domain-card">
+        <div class="domain-icon" style="background:${d.color}22;color:${d.color};">${d.icon}</div>
+        <div class="domain-num">Domain ${i+1} of 6</div>
+        <h3>${d.name}</h3>
+        <p>${d.description}</p>
+        <div class="domain-q-count">10 Questions</div>
+      </div>`).join('');
+  }
+
+  /* ── ASSESSMENT ───────────────────────────────────────────────── */
+  function startAssessment() {
+    showPage('assessmentPage');
+    renderDomain();
+  }
+  function renderDomain() {
+    const d = domains[currentDomain];
+    const total = 60;
+    const answered = totalAnswered();
+    const pct = Math.round(answered / total * 100);
+    // Pill + title
+    document.getElementById('domainPill').textContent = `Domain ${currentDomain+1} of 6`;
+    document.getElementById('domainTitleSm').textContent = d.name;
+    document.getElementById('progressText').textContent = `Question ${answered} of ${total} answered`;
+    document.getElementById('progressFill').style.width = pct + '%';
+    // Domain dots
+    const dots = document.getElementById('domainDots');
+    dots.innerHTML = domains.map((_, i) => {
+      let cls = '';
+      if (i < currentDomain) cls = 'completed';
+      else if (i === currentDomain) cls = 'active';
+      return `<div class="domain-dot ${cls}"></div>`;
+    }).join('');
+    // Questions
+    const qc = document.getElementById('questionContainer');
+    qc.innerHTML = d.questions.map((q, qi) => {
+      const r = responses[q.id] || '';
+      return `
+        <div class="question-card ${r ? 'answered' : ''}" id="card-${q.id}">
+          <div class="q-header">
+            <div class="q-num">${q.id}</div>
+            <div class="q-meta">
+              <div class="q-category">${q.category}</div>
+              <div class="q-text">${q.text}</div>
+            </div>
+          </div>
+          <div class="q-responses">
+            <button class="resp-btn ${r==='yes'?'active-yes':''}"
+              onclick="App.answer('${q.id}','yes')">
+              <span>✓</span> Yes
+            </button>
+            <button class="resp-btn ${r==='partial'?'active-partial':''}"
+              onclick="App.answer('${q.id}','partial')">
+              <span>◑</span> Partial
+            </button>
+            <button class="resp-btn ${r==='no'?'active-no':''}"
+              onclick="App.answer('${q.id}','no')">
+              <span>✗</span> No
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+    // Nav buttons
+    document.getElementById('btnPrevDomain').style.visibility = currentDomain === 0 ? 'hidden' : 'visible';
+    const isLast = currentDomain === 5;
+    const btn = document.getElementById('btnNextDomain');
+    const domainAnswered = answeredInDomain(currentDomain);
+    if (isLast) {
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg> Complete Assessment`;
+      btn.className = 'btn-primary';
+      btn.style.background = domainAnswered === 10 ? '#22C55E' : '';
+    } else {
+      btn.innerHTML = `Next Domain <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>`;
+      btn.className = 'btn-primary';
+      btn.style.background = '';
+    }
+    document.getElementById('qIndicator').textContent =
+      `${answeredInDomain(currentDomain)}/10 answered`;
+  }
+  function answer(qId, value) {
+    responses[qId] = value;
+    save();
+    // Update card styling
+    const card = document.getElementById('card-' + qId);
+    if (card) {
+      card.classList.add('answered');
+      card.querySelectorAll('.resp-btn').forEach(b => {
+        b.className = 'resp-btn';
+      });
+      const btns = card.querySelectorAll('.resp-btn');
+      if (value === 'yes')     btns[0].className = 'resp-btn active-yes';
+      if (value === 'partial') btns[1].className = 'resp-btn active-partial';
+      if (value === 'no')      btns[2].className = 'resp-btn active-no';
+    }
+    // Update progress
+    const answered = totalAnswered();
+    const pct = Math.round(answered / 60 * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = `Question ${answered} of 60 answered`;
+    document.getElementById('qIndicator').textContent = `${answeredInDomain(currentDomain)}/10 answered`;
+    // Update dot
+    const dots = document.getElementById('domainDots').querySelectorAll('.domain-dot');
+    if (answeredInDomain(currentDomain) === 10) {
+      dots[currentDomain].classList.add('completed');
+    }
+  }
+  function nextDomain() {
+    if (currentDomain < 5) {
+      currentDomain++;
+      renderDomain();
+      window.scrollTo(0, 0);
+    } else {
+      completeAssessment();
+    }
+  }
+  function prevDomain() {
+    if (currentDomain > 0) {
+      currentDomain--;
+      renderDomain();
+      window.scrollTo(0, 0);
+    }
+  }
+
+  /* ── COMPLETE + DASHBOARD ─────────────────────────────────────── */
+  function completeAssessment() {
+    showPage('dashboardPage');
+    renderDashboard();
+  }
+  function renderDashboard() {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
+    const ref = 'CG-' + now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + Math.floor(Math.random()*9000+1000);
+    document.getElementById('reportDateLine').textContent = `Generated on ${dateStr}`;
+    document.getElementById('reportDate').textContent = `Assessment Date: ${dateStr}`;
+    document.getElementById('reportRef').textContent = `Reference: ${ref}`;
+
+    const scores   = domains.map((_, i) => domainScore(i));
+    const total    = scores.reduce((a, b) => a + b, 0);
+    const maxTotal = 600;
+    const pct      = Math.round(total / maxTotal * 100);
+    const maturity = getMaturity(pct);
+
+    // Count passing domains (≥60)
+    const passing  = scores.filter(s => s >= 60).length;
+    const needAttn = 6 - passing;
+
+    // Risk rating
+    const riskMap = { 5:'Optimized', 4:'Low', 3:'Moderate', 2:'High', 1:'Critical' };
+    const risk = pct >= 81 ? 'Low' : pct >= 61 ? 'Moderate' : pct >= 41 ? 'High' : 'Critical';
+
+    renderKPIs(pct, maturity, risk, passing, needAttn);
+    renderCharts(scores, pct, maturity);
+    renderHeatmap(scores);
+    renderTrafficLights(scores);
+    renderDomainTable(scores, maturity);
+    renderRecommendations(scores);
+    renderExecutiveReport(scores, pct, maturity, risk, dateStr, ref);
+  }
+
+  /* KPIs */
+  function renderKPIs(pct, maturity, risk, passing, needAttn) {
+    const riskColors = { Low:'success', Moderate:'warning', High:'danger', Critical:'danger' };
+    const rc = riskColors[risk] || 'warning';
+    document.getElementById('kpiGrid').innerHTML = `
+      <div class="kpi-card">
+        <div class="kpi-label">Overall Score</div>
+        <div class="kpi-value score">${pct}%</div>
+        <div class="kpi-sub">Out of 100% maximum</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Security Maturity</div>
+        <div class="kpi-value" style="font-size:18px;color:${maturity.color};">${maturity.name}</div>
+        <div class="kpi-sub">Level ${maturity.level} of 5</div>
+        <div class="kpi-badge" style="background:${maturity.bg};color:${maturity.text};">L${maturity.level} — ${maturity.name}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Risk Rating</div>
+        <div class="kpi-value" style="font-size:20px;">${risk}</div>
+        <div class="kpi-sub">Overall exposure level</div>
+        <div class="kpi-badge risk-${rc.toLowerCase() === 'success' ? 'low' : rc.toLowerCase() === 'warning' ? 'medium' : 'high'}">${risk} Risk</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Completion</div>
+        <div class="kpi-value">${Math.round(Object.keys(responses).length / 60 * 100)}%</div>
+        <div class="kpi-sub">${Object.keys(responses).length} of 60 questions answered</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Domains Passing</div>
+        <div class="kpi-value" style="color:var(--success);">${passing}</div>
+        <div class="kpi-sub">Score ≥ 60%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Needs Attention</div>
+        <div class="kpi-value" style="color:var(--danger);">${needAttn}</div>
+        <div class="kpi-sub">Domains below 60%</div>
+      </div>`;
+  }
+
+  /* Charts */
+  function renderCharts(scores, overallPct, maturity) {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const gridColor = isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
+    const textColor = isDark ? '#94A3B8' : '#64748B';
+
+    // Destroy existing
+    Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
+    charts = {};
+
+    const labels = domains.map(d => d.name.split(' ')[0]);
+    const barColors = scores.map(s => s >= 80 ? '#22C55E' : s >= 60 ? '#3B82F6' : s >= 40 ? '#F59E0B' : '#EF4444');
+
+    // Bar chart
+    charts.bar = new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: {
+        labels: domains.map(d => d.name),
+        datasets: [{
+          label: 'Score',
+          data: scores,
+          backgroundColor: barColors,
+          borderRadius: 8,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 }, maxRotation: 30 } },
+          y: { min: 0, max: 100, grid: { color: gridColor }, ticks: { color: textColor, callback: v => v + '%' } }
+        }
+      }
+    });
+
+    // Radar chart
+    charts.radar = new Chart(document.getElementById('radarChart'), {
+      type: 'radar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Your Score',
+          data: scores,
+          backgroundColor: 'rgba(37,99,235,.2)',
+          borderColor: '#2563EB',
+          borderWidth: 2,
+          pointBackgroundColor: '#2563EB',
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          r: {
+            min: 0, max: 100,
+            grid: { color: gridColor },
+            ticks: { display: false },
+            pointLabels: { color: textColor, font: { size: 11 } }
+          }
+        }
+      }
+    });
+
+    // Doughnut
+    const remaining = 100 - overallPct;
+    charts.doughnut = new Chart(document.getElementById('doughnutChart'), {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: [overallPct, remaining],
+          backgroundColor: [maturity.color, isDark ? '#1E2D45' : '#E2E8F0'],
+          borderWidth: 0,
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        cutout: '72%',
+        plugins: { legend: { display: false }, tooltip: { enabled: false } }
+      }
+    });
+    document.getElementById('doughnutLabel').innerHTML = `
+      <div style="font-size:28px;font-weight:900;color:${maturity.color};letter-spacing:-1px;">${overallPct}%</div>
+      <div style="font-size:12px;color:var(--text-2);font-weight:600;">${maturity.name}</div>`;
+  }
+
+  /* Heatmap */
+  function renderHeatmap(scores) {
+    const cellClass = [
+      ['hm-low-low','hm-med-low','hm-high-low'],
+      ['hm-low-med','hm-med-med','hm-high-med'],
+      ['hm-low-high','hm-med-high','hm-high-high']
+    ]; // [impact][likelihood]
+    const labelLH = ['Low','Medium','High'];
+    // Build 3×3 grid cells with domain tags
+    const cells = Array.from({length:3}, () => Array.from({length:3}, () => []));
+    domains.forEach((d, i) => {
+      const {l, i: imp} = getDomainHeatmapPosition(scores[i]);
+      cells[imp-1][l-1].push(`<span style="font-size:11px;display:block;">${d.icon} ${d.name.split(' ')[0]}</span>`);
+    });
+
+    let html = `<div class="heatmap-grid">`;
+    // Header row (top-left empty, then likelihood labels)
+    html += `<div class="hm-cell hm-empty"></div>`;
+    html += labelLH.map(l => `<div class="hm-cell hm-label-row">${l}<br/><span style="font-weight:400;font-size:9px;">Likelihood</span></div>`).join('');
+    // Data rows
+    ['High','Medium','Low'].forEach((impLabel, ri) => {
+      const actualImpact = 2 - ri; // map to array index
+      html += `<div class="hm-cell hm-label-col">${impLabel}<br/><span style="font-weight:400;font-size:9px;">Impact</span></div>`;
+      for (let li = 0; li < 3; li++) {
+        const cls = cellClass[actualImpact][li];
+        const content = cells[actualImpact][li].join('') || '—';
+        html += `<div class="hm-cell ${cls}">${content}</div>`;
+      }
+    });
+    html += `</div>`;
+    document.getElementById('heatmapWrap').innerHTML = html;
+  }
+
+  /* Traffic lights */
+  function renderTrafficLights(scores) {
+    const wrap = document.getElementById('trafficLightWrap');
+    wrap.innerHTML = domains.map((d, i) => {
+      const s = scores[i];
+      const color = s >= 80 ? '#22C55E' : s >= 60 ? '#3B82F6' : s >= 50 ? '#F59E0B' : '#EF4444';
+      const label = s >= 80 ? 'Strong' : s >= 60 ? 'Adequate' : s >= 50 ? 'Review' : 'Critical';
+      const bg    = s >= 80 ? 'var(--success-dim)' : s >= 60 ? 'var(--blue-dim)' : s >= 50 ? 'var(--warning-dim)' : 'var(--danger-dim)';
+      return `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:12px;height:12px;border-radius:50%;background:${color};box-shadow:0 0 6px ${color}88;flex-shrink:0;"></div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-1);">${d.name}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="font-size:13px;font-weight:700;color:${color};">${s}%</div>
+            <div style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:${bg};color:${color};">${label}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  /* Domain table */
+  function renderDomainTable(scores, _) {
+    const risks = ['Low','Low','Moderate','High','Critical'];
+    const table = document.getElementById('domainTable');
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Domain</th>
+          <th>Score</th>
+          <th>Maturity Level</th>
+          <th>Risk Rating</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>` +
+      domains.map((d, i) => {
+        const s   = scores[i];
+        const m   = getMaturity(s);
+        const risk = s >= 80 ? 'Low' : s >= 60 ? 'Moderate' : s >= 40 ? 'High' : 'Critical';
+        const riskClass = risk === 'Low' ? 'risk-low' : risk === 'Moderate' ? 'risk-medium' : 'risk-high';
+        const dotColor = s >= 80 ? '#22C55E' : s >= 60 ? '#3B82F6' : s >= 50 ? '#F59E0B' : '#EF4444';
+        const barColor = s >= 80 ? '#22C55E' : s >= 60 ? '#3B82F6' : s >= 50 ? '#F59E0B' : '#EF4444';
+        return `<tr>
+          <td><strong>${d.icon} ${d.name}</strong></td>
+          <td>
+            <div class="score-bar-mini">
+              <div class="score-bar-mini-track">
+                <div class="score-bar-mini-fill" style="width:${s}%;background:${barColor};"></div>
+              </div>
+              <span class="score-badge" style="color:${barColor};">${s}%</span>
+            </div>
+          </td>
+          <td><span style="color:${m.color};font-weight:600;">L${m.level} ${m.name}</span></td>
+          <td><span class="risk-pill ${riskClass}">${risk}</span></td>
+          <td><span class="traffic-dot" style="background:${dotColor};"></span>${s >= 80 ? 'Strong' : s >= 60 ? 'Adequate' : s >= 50 ? 'Review' : 'Critical'}</td>
+        </tr>`;
+      }).join('') +
+      `</tbody>`;
+  }
+
+  /* Recommendations */
+  function renderRecommendations(scores) {
+    const allRecs = [];
+    domains.forEach((d, di) => {
+      d.questions.forEach(q => {
+        const r = responses[q.id];
+        if (r === 'no' || r === 'partial') {
+          const rec = d.recommendations[q.id];
+          if (rec) {
+            allRecs.push({
+              domain: d.name,
+              qId: q.id,
+              severity: r === 'no' ? 3 : 2,
+              domainScore: scores[di],
+              ...rec
+            });
+          }
+        }
+      });
+    });
+    // Sort: no answers first, then by domain score ascending
+    allRecs.sort((a, b) => (b.severity - a.severity) || (a.domainScore - b.domainScore));
+    const top10 = allRecs.slice(0, 10);
+
+    const container = document.getElementById('recsContainer');
+    if (top10.length === 0) {
+      container.innerHTML = `<div class="rec-card"><div class="rec-body"><div class="rec-title" style="color:var(--success);">🎉 Excellent posture — no critical recommendations identified.</div></div></div>`;
+      return;
+    }
+    container.innerHTML = top10.map((rec, idx) => {
+      const sev = rec.severity === 3 ? 'risk-high' : 'risk-medium';
+      const sevLabel = rec.severity === 3 ? 'High Priority' : 'Medium Priority';
+      return `
+        <div class="rec-card">
+          <div class="rec-rank">${String(idx+1).padStart(2,'0')}</div>
+          <div class="rec-body">
+            <div class="rec-meta">
+              <span class="rec-domain-tag">${rec.domain}</span>
+              <span class="risk-pill ${sev}">${sevLabel}</span>
+              <span style="font-size:11px;color:var(--text-3);">${rec.qId}</span>
+            </div>
+            <div class="rec-title">${rec.title}</div>
+            <div class="rec-detail">${rec.detail}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  /* Executive Report */
+  function renderExecutiveReport(scores, pct, maturity, risk, dateStr, ref) {
+    const total = scores.reduce((a,b) => a+b, 0);
+    const topDomain   = domains[scores.indexOf(Math.max(...scores))];
+    const bottomDomain = domains[scores.indexOf(Math.min(...scores))];
+    const passing = scores.filter(s => s >= 60).length;
+
+    // Executive Summary narrative
+    const narrative = `CyberVue identified an overall cybersecurity maturity score of ${pct}%, placing the organisation within the <strong>${maturity.name}</strong> maturity tier (Level ${maturity.level} of 5). ` +
+      `The assessment evaluated ${Object.keys(responses).length} of 60 control questions spanning six critical security domains. ` +
+      `${topDomain.name} demonstrated the strongest performance with a score of ${scores[domains.indexOf(topDomain)]}%, indicating established controls in this area. ` +
+      `${bottomDomain.name} presented the most significant opportunity for improvement with a score of ${scores[domains.indexOf(bottomDomain)]}%, requiring prioritised attention. ` +
+      `Overall, ${passing} of 6 domains achieved a score at or above the 60% adequacy threshold. ` +
+      `The organisation's overall cybersecurity risk rating is assessed as <strong>${risk}</strong>. ` +
+      `The recommendations contained in this report are ranked by severity and should be reviewed by the leadership team and incorporated into the organisation's cybersecurity improvement roadmap.`;
+
+    document.getElementById('rptExecutiveSummary').innerHTML = `
+      <div class="report-section-title">1. Executive Summary</div>
+      <div class="report-narrative">${narrative}</div>`;
+
+    // Overall results table
+    document.getElementById('rptOverallResults').innerHTML = `
+      <div class="report-section-title">2. Overall Results</div>
+      <table>
+        <thead>
+          <tr><th>Domain</th><th>Score</th><th>Maturity Level</th><th>Risk Rating</th></tr>
+        </thead>
+        <tbody>
+          ${domains.map((d, i) => {
+            const s = scores[i];
+            const m = getMaturity(s);
+            const r = s >= 80 ? 'Low' : s >= 60 ? 'Moderate' : s >= 40 ? 'High' : 'Critical';
+            const rClass = r==='Low'?'risk-low':r==='Moderate'?'risk-medium':'risk-high';
+            return `<tr>
+              <td><strong>${d.icon} ${d.name}</strong></td>
+              <td><strong style="color:${m.color}">${s}%</strong></td>
+              <td>L${m.level} — ${m.name}</td>
+              <td><span class="risk-pill ${rClass}">${r}</span></td>
+            </tr>`;
+          }).join('')}
+          <tr style="background:var(--surface-2);">
+            <td><strong>Overall</strong></td>
+            <td><strong style="color:${maturity.color}">${pct}%</strong></td>
+            <td><strong>${maturity.name} (Level ${maturity.level})</strong></td>
+            <td><span class="risk-pill ${risk==='Low'?'risk-low':risk==='Moderate'?'risk-medium':'risk-high'}">${risk}</span></td>
+          </tr>
+        </tbody>
+      </table>`;
+
+    // Domain analysis
+    const domainAnalysis = domains.map((d, i) => {
+      const s = scores[i];
+      const m = getMaturity(s);
+      const yesCount     = d.questions.filter(q => responses[q.id]==='yes').length;
+      const partialCount = d.questions.filter(q => responses[q.id]==='partial').length;
+      const noCount      = d.questions.filter(q => responses[q.id]==='no').length;
+      const strength = s >= 70
+        ? `This domain demonstrates a solid cybersecurity posture with ${yesCount} controls fully implemented.`
+        : s >= 50
+        ? `This domain shows partial implementation of key controls. ${partialCount} controls are in progress.`
+        : `This domain requires significant attention. Only ${yesCount} of 10 controls are fully implemented.`;
+      const weakness = noCount === 0
+        ? 'No critical gaps identified in this domain.'
+        : `${noCount} control(s) have not been implemented and represent the primary gaps requiring remediation.`;
+      const recs = s < 80
+        ? `Prioritise closing the ${noCount} unanswered controls, formalise partial implementations, and assign ownership for each improvement action.`
+        : 'Maintain current controls and conduct periodic reviews to sustain the high maturity level.';
+      return `
+        <div class="report-domain-block">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+            <div>
+              <div class="report-domain-name">${d.icon} ${d.name}</div>
+              <div style="font-size:12px;color:var(--text-2);">Domain ${i+1} of 6 — ${yesCount} Yes · ${partialCount} Partial · ${noCount} No</div>
+            </div>
+            <div class="report-domain-score" style="color:${m.color};">${s}% <span style="font-size:14px;font-weight:600;">— ${m.name}</span></div>
+          </div>
+          <div class="report-domain-row">
+            <div class="report-domain-col">
+              <div class="report-col-label">Strengths</div>
+              <div class="report-col-text">${strength}</div>
+            </div>
+            <div class="report-domain-col">
+              <div class="report-col-label">Weaknesses</div>
+              <div class="report-col-text">${weakness}</div>
+            </div>
+            <div class="report-domain-col">
+              <div class="report-col-label">Recommendations</div>
+              <div class="report-col-text">${recs}</div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+    document.getElementById('rptDomainAnalysis').innerHTML = `
+      <div class="report-section-title">3. Domain Analysis</div>
+      ${domainAnalysis}`;
+
+    // Prioritised recommendations
+    const allRecs = [];
+    domains.forEach((d, di) => {
+      d.questions.forEach(q => {
+        const r = responses[q.id];
+        if (r === 'no' || r === 'partial') {
+          const rec = d.recommendations[q.id];
+          if (rec) allRecs.push({ domain: d.name, qId: q.id, severity: r==='no'?3:2, domainScore: scores[di], ...rec });
+        }
+      });
+    });
+    allRecs.sort((a,b) => (b.severity - a.severity) || (a.domainScore - b.domainScore));
+    const top = allRecs.slice(0, 10);
+    const recsHtml = top.length === 0
+      ? `<div style="color:var(--success);font-weight:600;">No critical recommendations — excellent cybersecurity posture.</div>`
+      : top.map((rec, idx) => `
+          <div class="report-rec-item">
+            <div class="report-rec-num">${String(idx+1).padStart(2,'0')}</div>
+            <div class="report-rec-body">
+              <div class="report-rec-title">${rec.title} <span style="font-size:11px;color:var(--text-3);font-weight:400;">[${rec.qId} — ${rec.domain}]</span></div>
+              <div class="report-rec-detail">${rec.detail}</div>
+            </div>
+          </div>`).join('');
+    document.getElementById('rptRecommendations').innerHTML = `
+      <div class="report-section-title">4. Prioritised Recommendations</div>
+      ${recsHtml}`;
+  }
+
+  /* ── ACTIONS ──────────────────────────────────────────────────── */
+  function retakeAssessment() {
+    if (!confirm('Are you sure you want to retake? All current responses will be cleared.')) return;
+    responses = {};
+    currentDomain = 0;
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
+    showPage('landingPage');
+    showToast('Assessment cleared. Ready to start again.');
+  }
+  function exportJSON() {
+    const data = {
+      meta: { date: new Date().toISOString(), version: '2.0', tool: 'CyberVue' },
+      responses,
+      scores: domains.map((d, i) => ({ domain: d.name, score: domainScore(i) }))
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'cybervue-results.json'; a.click();
+    URL.revokeObjectURL(url);
+    showToast('Results exported as JSON.');
+  }
+  function importResults(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.responses) {
+          responses = data.responses;
+          save();
+          showPage('dashboardPage');
+          renderDashboard();
+          showToast('Previous results imported successfully.');
+        } else {
+          showToast('Invalid results file format.');
+        }
+      } catch(err) { showToast('Failed to import: invalid JSON file.'); }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+  function exportPDF() {
+    showToast('Generating PDF…', 8000);
+    const el = document.getElementById('reportSection');
+    const opt = {
+      margin:      [10, 10, 10, 10],
+      filename:    'CyberVue-Assessment-Report.pdf',
+      image:       { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(el).save().then(() => showToast('PDF saved successfully.'));
+  }
+
+  /* ── DARK MODE ────────────────────────────────────────────────── */
+  function toggleDark() {
+    darkMode = !darkMode;
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : '');
+    document.getElementById('darkToggle').textContent = darkMode ? '☀️' : '🌙';
+    // Redraw charts if visible
+    if (!document.getElementById('dashboardPage').classList.contains('hidden')) {
+      const scores = domains.map((_, i) => domainScore(i));
+      const total  = scores.reduce((a,b) => a+b, 0);
+      const pct    = Math.round(total / 600 * 100);
+      const mat    = getMaturity(pct);
+      renderCharts(scores, pct, mat);
+    }
+  }
+
+  /* ── INIT ─────────────────────────────────────────────────────── */
+  function init() {
+    renderLandingCards();
+    const hadSaved = load();
+    if (hadSaved && Object.keys(responses).length > 0) {
+      showToast('Previous session restored. Click "Start Assessment" to continue.');
+    }
+    document.getElementById('darkToggle').addEventListener('click', toggleDark);
+  }
+
+  return { init, startAssessment, answer, nextDomain, prevDomain,
+           retakeAssessment, exportJSON, importResults, exportPDF };
+})();
+
+document.addEventListener('DOMContentLoaded', App.init);
+</script>
+</body>
+</html>
