@@ -135,7 +135,7 @@ input, select, textarea { font-family: var(--font); }
 .page { padding-top: 60px; min-height: 100vh; }
  
 /* Dashboard page needs extra breathing room below the fixed topbar */
-#dashboardPage { padding-top: 80px; }
+/* dashboard padding handled in main rule above */
  
 /* ─── ── LANDING ─────────────────────────────────────────────────── */
 #landingPage {
@@ -498,7 +498,7 @@ input, select, textarea { font-family: var(--font); }
 #dashboardPage {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 36px 24px 80px;
+  padding: 96px 24px 80px;
 }
  
 /* Dashboard top actions */
@@ -821,7 +821,7 @@ tr:hover td { background: var(--surface-2); }
   .stats-strip { gap: 24px; padding: 24px 16px; }
   .landing-domains { padding: 40px 16px; }
   #assessmentPage { padding: 24px 12px 60px; }
-  #dashboardPage { padding-top: 80px; padding-left: 12px; padding-right: 12px; padding-bottom: 60px; }
+  #dashboardPage { padding: 96px 12px 60px; }
   #reportSection { padding: 24px 16px; }
   .q-responses { flex-direction: column; }
   .kpi-grid { grid-template-columns: 1fr 1fr; }
@@ -891,9 +891,6 @@ tr:hover td { background: var(--surface-2); }
       <div class="hero-feature"><span class="check">✓</span> 60 Questions</div>
       <div class="hero-feature"><span class="check">✓</span> 6 Security Domains</div>
       <div class="hero-feature"><span class="check">✓</span> Executive Report</div>
-      <div class="hero-feature"><span class="check">✓</span> Immediate Results</div>
-      <div class="hero-feature"><span class="check">✓</span> No Registration</div>
-      <div class="hero-feature"><span class="check">✓</span> PDF Export</div>
     </div>
     <button class="hero-cta" onclick="App.startAssessment()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>
