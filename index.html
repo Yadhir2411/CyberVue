@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 /* ─── DESIGN TOKENS ─────────────────────────────────────────────── */
@@ -926,7 +927,7 @@ tr:hover td { background: var(--surface-2); }
   <div class="landing-cta-section">
     <div class="section-label">Ready to begin?</div>
     <h2 class="section-title" style="margin-bottom:12px;">Measure. Understand. Improve.</h2>
-    <p style="color:var(--text-2);font-size:15px;margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;">Receive an executive-grade cybersecurity report instantly.</p>
+    <p style="color:var(--text-2);font-size:15px;margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;">Start your free baseline assessment and receive an executive-grade cybersecurity report instantly.</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
       <button class="btn-primary" onclick="App.startAssessment()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>
@@ -1095,6 +1096,7 @@ tr:hover td { background: var(--surface-2); }
 
     <!-- Charts section injected here during PDF export -->
     <div id="pdfChartsSection"></div>
+    <canvas id="radarChartOffscreen" width="600" height="500" style="position:absolute;left:-9999px;top:-9999px;"></canvas>
 
     <div class="report-section" id="rptExecutiveSummary"></div>
     <div class="report-section" id="rptOverallResults"></div>
@@ -1114,8 +1116,12 @@ tr:hover td { background: var(--surface-2); }
 <!-- APPLICATION JAVASCRIPT                                           -->
 <!-- ════════════════════════════════════════════════════════════════ -->
 <script>
+// Prevent the datalabels plugin from auto-attaching to every chart;
+// it is only explicitly added to specific radar charts via the `plugins` array.
+if (window.ChartDataLabels) { Chart.unregister(window.ChartDataLabels); }
+
 /* ──────────────────────────────────────────────────────────────────
-   DATA: 60 questions across 6 domains
+   DATA: 90 questions across 9 domains
    ────────────────────────────────────────────────────────────────── */
 const domains = [
   {
@@ -1699,6 +1705,81 @@ const App = (() => {
       </div>`;
   }
 
+  /* Build a radar chart for a given canvas + sector (used for both live dashboard and PDF export) */
+  function buildRadarChart(canvasId, scores, sectorKey, opts) {
+    opts = opts || {};
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const gridColor = isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
+    const textColor = isDark ? '#94A3B8' : '#64748B';
+    const radarScores = scores.map(s => +(s / 10).toFixed(1));
+    const bm = industryBenchmarks[sectorKey];
+    const radarLabels = domains.map(d => d.name.length > 15 ? d.name.split(' ').slice(0,2).join(' ') : d.name);
+    const showDataLabels = !!opts.showDataLabels;
+
+    return new Chart(document.getElementById(canvasId), {
+      type: 'radar',
+      data: {
+        labels: radarLabels,
+        datasets: [
+          {
+            label: 'UUW Score',
+            data: radarScores,
+            backgroundColor: 'rgba(37,99,235,.2)',
+            borderColor: '#2563EB',
+            borderWidth: 2.5,
+            pointBackgroundColor: '#2563EB',
+            pointRadius: showDataLabels ? 3 : 4
+          },
+          {
+            label: `${bm.label} Average`,
+            data: bm.scores,
+            backgroundColor: 'rgba(249,115,22,.12)',
+            borderColor: '#F97316',
+            borderWidth: 2,
+            borderDash: [5, 4],
+            pointBackgroundColor: '#F97316',
+            pointRadius: showDataLabels ? 3 : 3
+          }
+        ]
+      },
+      options: {
+        responsive: !opts.staticSize, maintainAspectRatio: true,
+        animation: opts.staticSize ? false : undefined,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: { color: opts.forceColor || textColor, font: { size: opts.staticSize ? 12 : 11 }, boxWidth: 14, padding: 12 }
+          },
+          tooltip: {
+            callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.r}/10` }
+          },
+          datalabels: showDataLabels ? {
+            color: ctx => ctx.datasetIndex === 0 ? '#1D4ED8' : '#C2410C',
+            font: { size: 10, weight: '700' },
+            align: ctx => ctx.datasetIndex === 0 ? 'end' : 'start',
+            formatter: v => v.toFixed(1)
+          } : false
+        },
+        scales: {
+          r: {
+            min: 0, max: 10,
+            grid: { color: opts.forceGrid || gridColor },
+            ticks: {
+              stepSize: 2,
+              display: true,
+              color: opts.forceColor || textColor,
+              font: { size: opts.staticSize ? 11 : 9 },
+              callback: v => v + '/10'
+            },
+            pointLabels: { color: opts.forceColor || textColor, font: { size: opts.staticSize ? 12 : 10 } }
+          }
+        }
+      },
+      plugins: showDataLabels && window.ChartDataLabels ? [window.ChartDataLabels] : []
+    });
+  }
+
   /* Charts */
   function renderCharts(scores, overallPct, maturity) {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -1736,66 +1817,8 @@ const App = (() => {
     });
 
     // Radar chart — scores expressed as /10, with sector-aware industry benchmark overlay
-    const radarScores = scores.map(s => +(s / 10).toFixed(1));
     const bm = industryBenchmarks[benchmarkSector];
-    const benchmarkScores = bm.scores;
-    const radarLabels = domains.map(d => d.name.length > 15 ? d.name.split(' ').slice(0,2).join(' ') : d.name);
-    charts.radar = new Chart(document.getElementById('radarChart'), {
-      type: 'radar',
-      data: {
-        labels: radarLabels,
-        datasets: [
-          {
-            label: 'Your Score',
-            data: radarScores,
-            backgroundColor: 'rgba(37,99,235,.2)',
-            borderColor: '#2563EB',
-            borderWidth: 2.5,
-            pointBackgroundColor: '#2563EB',
-            pointRadius: 4
-          },
-          {
-            label: `${bm.label} Average`,
-            data: benchmarkScores,
-            backgroundColor: 'rgba(249,115,22,.12)',
-            borderColor: '#F97316',
-            borderWidth: 2,
-            borderDash: [5, 4],
-            pointBackgroundColor: '#F97316',
-            pointRadius: 3
-          }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: true,
-        plugins: {
-          legend: {
-            display: true,
-            position: 'bottom',
-            labels: { color: textColor, font: { size: 11 }, boxWidth: 14, padding: 12 }
-          },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.dataset.label}: ${ctx.parsed.r}/10`
-            }
-          }
-        },
-        scales: {
-          r: {
-            min: 0, max: 10,
-            grid: { color: gridColor },
-            ticks: {
-              stepSize: 2,
-              display: true,
-              color: textColor,
-              font: { size: 9 },
-              callback: v => v + '/10'
-            },
-            pointLabels: { color: textColor, font: { size: 10 } }
-          }
-        }
-      }
-    });
+    charts.radar = buildRadarChart('radarChart', scores, benchmarkSector);
 
     const noteEl = document.getElementById('benchmarkSourceNote');
     if (noteEl) noteEl.innerHTML = `<strong>${bm.label} benchmark:</strong> ${bm.source}`;
@@ -2156,7 +2179,7 @@ const App = (() => {
     event.target.value = '';
   }
   function exportPDF() {
-    showToast('Generating PDF — please wait…', 12000);
+    showToast('Generating PDF — please wait…', 15000);
 
     // ── 1. Capture each Chart.js canvas as a PNG data URL ──────────
     function canvasToDataURL(id) {
@@ -2164,10 +2187,75 @@ const App = (() => {
       return c ? c.toDataURL('image/png', 1.0) : null;
     }
     const barImg      = canvasToDataURL('barChart');
-    const radarImg    = canvasToDataURL('radarChart');
     const doughnutImg = canvasToDataURL('doughnutChart');
 
-    // ── 2. Build chart section HTML and inject into report ─────────
+    // ── 2. Render BOTH sector radar charts (Private + Public) on the
+    //       offscreen canvas, one at a time, capturing each as a PNG.
+    //       Data labels are enabled so the /10 numbers print on the chart.
+    const scores = domains.map((_, i) => domainScore(i));
+    const offscreenCanvas = document.getElementById('radarChartOffscreen');
+    let offscreenChartInstance = null;
+
+    function captureSectorRadar(sectorKey) {
+      if (offscreenChartInstance) { offscreenChartInstance.destroy(); offscreenChartInstance = null; }
+      offscreenChartInstance = buildRadarChart('radarChartOffscreen', scores, sectorKey, {
+        showDataLabels: true,
+        staticSize: true,
+        forceColor: '#475569',
+        forceGrid: 'rgba(0,0,0,.08)'
+      });
+      offscreenChartInstance.resize();
+      offscreenChartInstance.update('none');
+      return offscreenCanvas.toDataURL('image/png', 1.0);
+    }
+
+    const privateRadarImg = captureSectorRadar('private');
+    const publicRadarImg  = captureSectorRadar('public');
+    if (offscreenChartInstance) { offscreenChartInstance.destroy(); offscreenChartInstance = null; }
+
+    // ── 3. Build a small score comparison table for each sector ────
+    function sectorScoreTable(sectorKey) {
+      const bm = industryBenchmarks[sectorKey];
+      const rows = domains.map((d, i) => {
+        const s10 = (scores[i] / 10).toFixed(1);
+        const b10 = bm.scores[i].toFixed(1);
+        const diff = (s10 - b10).toFixed(1);
+        const diffColor = diff >= 0 ? '#15803D' : '#B91C1C';
+        const diffStr = diff >= 0 ? `+${diff}` : diff;
+        const shortName = d.name.length > 22 ? d.name.split(' ').slice(0,2).join(' ') : d.name;
+        return `<tr>
+          <td style="text-align:left;padding:3px 6px;font-size:9.5px;color:#334155;">${d.icon} ${shortName}</td>
+          <td style="text-align:center;padding:3px 6px;font-size:9.5px;font-weight:700;color:#1D4ED8;">${s10}</td>
+          <td style="text-align:center;padding:3px 6px;font-size:9.5px;color:#C2410C;">${b10}</td>
+          <td style="text-align:center;padding:3px 6px;font-size:9.5px;font-weight:700;color:${diffColor};">${diffStr}</td>
+        </tr>`;
+      }).join('');
+      const overallDiff = ((scores.reduce((a,b)=>a+b,0)/90/10) - bm.overallAvg).toFixed(1);
+      const overallDiffColor = overallDiff >= 0 ? '#15803D' : '#B91C1C';
+      const overallDiffStr = overallDiff >= 0 ? `+${overallDiff}` : overallDiff;
+      return `
+        <table style="width:100%;border-collapse:collapse;margin-top:8px;">
+          <thead>
+            <tr style="border-bottom:1.5px solid #CBD5E1;">
+              <th style="text-align:left;padding:3px 6px;font-size:9px;color:#64748B;text-transform:uppercase;letter-spacing:.4px;">Domain</th>
+              <th style="text-align:center;padding:3px 6px;font-size:9px;color:#64748B;text-transform:uppercase;">UUW</th>
+              <th style="text-align:center;padding:3px 6px;font-size:9px;color:#64748B;text-transform:uppercase;">Bench.</th>
+              <th style="text-align:center;padding:3px 6px;font-size:9px;color:#64748B;text-transform:uppercase;">Diff</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+          <tfoot>
+            <tr style="border-top:1.5px solid #CBD5E1;">
+              <td style="text-align:left;padding:4px 6px;font-size:10px;font-weight:800;color:#0B1F4D;">Overall</td>
+              <td style="text-align:center;padding:4px 6px;font-size:10px;font-weight:800;color:#1D4ED8;">${(scores.reduce((a,b)=>a+b,0)/90/10).toFixed(1)}</td>
+              <td style="text-align:center;padding:4px 6px;font-size:10px;font-weight:800;color:#C2410C;">${bm.overallAvg.toFixed(1)}</td>
+              <td style="text-align:center;padding:4px 6px;font-size:10px;font-weight:800;color:${overallDiffColor};">${overallDiffStr}</td>
+            </tr>
+          </tfoot>
+        </table>`;
+    }
+
+    // ── 4. Build chart section HTML and inject into report ─────────
     const pdfCharts = document.getElementById('pdfChartsSection');
     pdfCharts.innerHTML = `
       <div style="margin-bottom:28px;">
@@ -2181,24 +2269,41 @@ const App = (() => {
             <h4>Domain Maturity Scores</h4>
             <img src="${barImg}" alt="Bar Chart"/>
           </div>` : ''}
-          ${radarImg ? `<div class="pdf-chart-box">
-            <h4>Posture Radar vs ${industryBenchmarks[benchmarkSector].label} Benchmark</h4>
-            <img src="${radarImg}" alt="Radar Chart"/>
-          </div>` : ''}
           ${doughnutImg ? `<div class="pdf-chart-box">
             <h4>Overall Maturity</h4>
             <img src="${doughnutImg}" alt="Doughnut Chart"/>
           </div>` : ''}
         </div>
+
+        <div style="font-size:13px;font-weight:800;color:#0B1F4D;margin:24px 0 4px;">
+          Posture Radar — Private Sector vs Public Sector Benchmark Comparison
+        </div>
+        <div style="font-size:10px;color:#64748B;margin-bottom:14px;">
+          Scores out of 10 · Blue = UUW Score · Orange = Industry Benchmark Average. Source notes below each chart.
+        </div>
+        <div class="pdf-chart-row" style="align-items:flex-start;">
+          <div class="pdf-chart-box" style="flex:1;">
+            <h4>vs ${industryBenchmarks.private.label} Benchmark</h4>
+            <img src="${privateRadarImg}" alt="Radar Chart — Private Sector"/>
+            ${sectorScoreTable('private')}
+            <p style="font-size:8.5px;color:#94A3B8;margin-top:8px;line-height:1.4;text-align:left;">${industryBenchmarks.private.source}</p>
+          </div>
+          <div class="pdf-chart-box" style="flex:1;">
+            <h4>vs ${industryBenchmarks.public.label} Benchmark</h4>
+            <img src="${publicRadarImg}" alt="Radar Chart — Public Sector"/>
+            ${sectorScoreTable('public')}
+            <p style="font-size:8.5px;color:#94A3B8;margin-top:8px;line-height:1.4;text-align:left;">${industryBenchmarks.public.source}</p>
+          </div>
+        </div>
       </div>`;
     pdfCharts.classList.add('pdf-visible');
 
-    // ── 3. Add page-break-avoid to every domain block & rec item ───
+    // ── 5. Add page-break-avoid to every domain block & rec item ───
     document.querySelectorAll('.report-domain-block, .report-rec-item, .report-section').forEach(el => {
       el.classList.add('pdf-avoid-break');
     });
 
-    // ── 4. Render to PDF ───────────────────────────────────────────
+    // ── 6. Render to PDF ───────────────────────────────────────────
     const el = document.getElementById('reportSection');
     const opt = {
       margin:      [15, 12, 15, 12],
@@ -2219,7 +2324,7 @@ const App = (() => {
       .from(el)
       .save()
       .then(() => {
-        // ── 5. Tear down injected elements ──────────────────────────
+        // ── 7. Tear down injected elements ──────────────────────────
         pdfCharts.innerHTML = '';
         pdfCharts.classList.remove('pdf-visible');
         document.querySelectorAll('.report-domain-block, .report-rec-item, .report-section').forEach(el => {
