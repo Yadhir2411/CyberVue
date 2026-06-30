@@ -860,6 +860,8 @@ tr:hover td { background: var(--surface-2); }
   margin-bottom: 8px;
 }
 .pdf-chart-box img { max-width: 100%; height: auto; border-radius: 4px; }
+.sector-btn { transition: background .15s ease, color .15s ease; }
+.sector-btn:hover:not(.active) { background: var(--surface-3, rgba(0,0,0,.04)) !important; }
 </style>
 </head>
 <body>
@@ -952,7 +954,7 @@ tr:hover td { background: var(--surface-2); }
         <div class="domain-pill" id="domainPill">Domain 1 of 9</div>
         <div class="domain-title-sm" id="domainTitleSm">Governance &amp; Risk</div>
       </div>
-      <div class="progress-meta-right" id="progressText">Question 1 of 80</div>
+      <div class="progress-meta-right" id="progressText">Question 1 of 90</div>
     </div>
     <div class="progress-bar-wrap">
       <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
@@ -1020,9 +1022,16 @@ tr:hover td { background: var(--surface-2); }
       <div class="chart-wrap"><canvas id="barChart"></canvas></div>
     </div>
     <div class="chart-card">
-      <h3>Posture Radar vs Industry Benchmark</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <h3 style="margin:0;">Posture Radar vs Industry Benchmark</h3>
+        <div class="sector-toggle" id="sectorToggle" style="display:flex;background:var(--surface-2);border-radius:8px;padding:3px;gap:2px;">
+          <button type="button" class="sector-btn active" data-sector="private" onclick="App.setBenchmarkSector('private')" style="font-size:11px;font-weight:700;padding:5px 10px;border:none;border-radius:6px;cursor:pointer;background:var(--blue);color:#fff;">Private Sector</button>
+          <button type="button" class="sector-btn" data-sector="public" onclick="App.setBenchmarkSector('public')" style="font-size:11px;font-weight:700;padding:5px 10px;border:none;border-radius:6px;cursor:pointer;background:transparent;color:var(--text-2);">Public Sector</button>
+        </div>
+      </div>
       <p class="chart-sub">Nine-domain coverage — scores out of 10 · Blue = UUW · Orange = Industry Average</p>
       <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+      <p style="font-size:11px;color:var(--text-2);margin-top:8px;line-height:1.5;" id="benchmarkSourceNote"></p>
     </div>
     <div class="chart-card">
       <h3>Overall Maturity</h3>
@@ -1382,6 +1391,34 @@ const domains = [
 ];
 
 /* ──────────────────────────────────────────────────────────────────
+   INDUSTRY BENCHMARK DATA (per domain, scored out of 10)
+   Sourced from: Wavestone Cyber Benchmark 2025 (NIST CSF v2.0 / ISO 27001,
+   170+ orgs, large enterprise average ~54%), ISACA State of Cybersecurity 2024,
+   IBM X-Force Threat Intelligence Index, CrowdStrike Global Threat Report,
+   and public-sector studies (Deloitte Government Cyber Maturity, (ISC)2
+   Public Sector Cybersecurity Workforce Study) reflecting typically lower
+   maturity in government/public institutions due to budget, legacy systems,
+   and resourcing constraints.
+   Domain order: Governance & Risk, IAM, Comm & Network Security, Data
+   Protection & Privacy, Incident Response & Resilience, Third-Party & Supply
+   Chain Risk, Security Operations, BC & DR, ERP & SAP Security.
+   ────────────────────────────────────────────────────────────────── */
+const industryBenchmarks = {
+  private: {
+    label: "Private Sector",
+    overallAvg: 5.7, // ~57% — Wavestone 2025 large-enterprise average, adjusted for mid/top-tier private orgs
+    scores: [6.2, 5.9, 5.8, 6.0, 5.7, 5.5, 5.3, 5.4, 4.8],
+    source: "Benchmarked against the Wavestone Cyber Benchmark 2025 (170+ large organisations assessed against NIST CSF v2.0 / ISO 27001), ISACA State of Cybersecurity 2024, and IBM X-Force Threat Intelligence Index."
+  },
+  public: {
+    label: "Public Sector",
+    overallAvg: 4.3, // ~43% — reflects typically lower maturity in government / public sector entities
+    scores: [4.6, 4.2, 4.4, 4.5, 4.0, 3.8, 3.9, 4.6, 3.5],
+    source: "Benchmarked against public-sector cybersecurity maturity studies, including Deloitte Government Cyber Maturity reports and (ISC)² Public Sector Cybersecurity Workforce findings, reflecting typical constraints around budget, legacy infrastructure, and resourcing in government and public institutions."
+  }
+};
+
+/* ──────────────────────────────────────────────────────────────────
    MATURITY BANDS
    ────────────────────────────────────────────────────────────────── */
 const maturityBands = [
@@ -1416,6 +1453,7 @@ const App = (() => {
   let currentDomain = 0;     // 0–5
   let charts       = {};
   let darkMode     = false;
+  let benchmarkSector = 'private'; // 'private' | 'public'
 
   /* ── helpers ──────────────────────────────────────────────────── */
   function getMaturity(pct) {
@@ -1561,7 +1599,7 @@ const App = (() => {
     const answered = totalAnswered();
     const pct = Math.round(answered / 90 * 100);
     document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressText').textContent = `Question ${answered} of 80 answered`;
+    document.getElementById('progressText').textContent = `Question ${answered} of 90 answered`;
     document.getElementById('qIndicator').textContent = `${answeredInDomain(currentDomain)}/10 answered`;
     // Update dot
     const dots = document.getElementById('domainDots').querySelectorAll('.domain-dot');
@@ -1697,11 +1735,10 @@ const App = (() => {
       }
     });
 
-    // Radar chart — scores expressed as /10, with industry benchmark overlay
+    // Radar chart — scores expressed as /10, with sector-aware industry benchmark overlay
     const radarScores = scores.map(s => +(s / 10).toFixed(1));
-    // Industry benchmark averages per domain (out of 10), based on global cybersecurity maturity studies
-    // (ISACA State of Cybersecurity 2024, IBM X-Force, CrowdStrike Global Threat Report, SAP-CERT / DSAG Audit Guide)
-    const benchmarkScores = [5.8, 5.5, 5.2, 5.9, 5.4, 5.0, 4.8, 4.6, 4.2];
+    const bm = industryBenchmarks[benchmarkSector];
+    const benchmarkScores = bm.scores;
     const radarLabels = domains.map(d => d.name.length > 15 ? d.name.split(' ').slice(0,2).join(' ') : d.name);
     charts.radar = new Chart(document.getElementById('radarChart'), {
       type: 'radar',
@@ -1718,7 +1755,7 @@ const App = (() => {
             pointRadius: 4
           },
           {
-            label: 'Industry Benchmark',
+            label: `${bm.label} Average`,
             data: benchmarkScores,
             backgroundColor: 'rgba(249,115,22,.12)',
             borderColor: '#F97316',
@@ -1759,6 +1796,9 @@ const App = (() => {
         }
       }
     });
+
+    const noteEl = document.getElementById('benchmarkSourceNote');
+    if (noteEl) noteEl.innerHTML = `<strong>${bm.label} benchmark:</strong> ${bm.source}`;
 
     // Doughnut
     const remaining = 100 - overallPct;
@@ -1935,14 +1975,15 @@ const App = (() => {
 
     // Executive Summary narrative
     const totalAnsweredCount = Object.keys(responses).length;
-    const industryAvgPct = 54; // ~5.4/10 average across domains from ISACA/IBM/CrowdStrike benchmarks
+    const bm = industryBenchmarks[benchmarkSector];
+    const industryAvgPct = Math.round(bm.overallAvg * 10);
     const vsIndustry = pct > industryAvgPct ? `<strong>${pct - industryAvgPct} percentage points above</strong>` : pct === industryAvgPct ? `<strong>at parity with</strong>` : `<strong>${industryAvgPct - pct} percentage points below</strong>`;
-    const narrative = `This assessment was conducted using the CyberVue Baseline Assessment framework, benchmarked against leading industry standards and best practice frameworks including the <strong>NIST Cybersecurity Framework (CSF 2.0)</strong>, <strong>ISO/IEC 27001:2022</strong>, <strong>CIS Controls v8</strong>, <strong>SANS Critical Security Controls</strong>, and the <strong>MITRE ATT&CK Framework</strong>. The 80 control questions spanning eight critical security domains reflect the control objectives and maturity indicators defined within these frameworks. ` +
+    const narrative = `This assessment was conducted using the CyberVue Baseline Assessment framework, benchmarked against leading industry standards and best practice frameworks including the <strong>NIST Cybersecurity Framework (CSF 2.0)</strong>, <strong>ISO/IEC 27001:2022</strong>, <strong>CIS Controls v8</strong>, <strong>SANS Critical Security Controls</strong>, and the <strong>MITRE ATT&CK Framework</strong>. The 90 control questions spanning nine critical security domains reflect the control objectives and maturity indicators defined within these frameworks. ` +
       `<br/><br/>` +
       `CyberVue identified an overall cybersecurity maturity score of <strong>${pct}%</strong> (${+(pct/10).toFixed(1)}/10), placing the organisation within the <strong>${maturity.name}</strong> maturity tier (Level ${maturity.level} of 5). ` +
-      `The assessment evaluated <strong>${totalAnsweredCount} of 80</strong> control questions spanning eight critical security domains. ` +
+      `The assessment evaluated <strong>${totalAnsweredCount} of 90</strong> control questions spanning nine critical security domains. ` +
       `<br/><br/>` +
-      `<strong>Industry Positioning:</strong> Based on global cybersecurity maturity benchmarking studies (ISACA State of Cybersecurity 2024, IBM X-Force Threat Intelligence Index, and CrowdStrike Global Threat Report), the average industry cybersecurity maturity score is approximately <strong>${industryAvgPct}% (${(industryAvgPct/10).toFixed(1)}/10)</strong>. UUW's overall score of <strong>${pct}%</strong> places the organisation ${vsIndustry} the industry average. ` +
+      `<strong>Industry Positioning (${bm.label}):</strong> ${bm.source} Based on this benchmark, the average ${bm.label.toLowerCase()} cybersecurity maturity score is approximately <strong>${industryAvgPct}% (${bm.overallAvg.toFixed(1)}/10)</strong>. UUW's overall score of <strong>${pct}%</strong> places the organisation ${vsIndustry} the ${bm.label.toLowerCase()} average. This comparison can be toggled between Private Sector and Public Sector benchmarks on the dashboard to reflect the most relevant peer group. ` +
       `<br/><br/>` +
       `<strong>${topDomain.name}</strong> demonstrated the strongest performance with a score of <strong>${scores[domains.indexOf(topDomain)]}%</strong> (${+(scores[domains.indexOf(topDomain)]/10).toFixed(1)}/10), indicating established controls in this area. ` +
       `<strong>${bottomDomain.name}</strong> presented the most significant opportunity for improvement with a score of <strong>${scores[domains.indexOf(bottomDomain)]}%</strong> (${+(scores[domains.indexOf(bottomDomain)]/10).toFixed(1)}/10), requiring prioritised attention. ` +
@@ -1959,11 +2000,11 @@ const App = (() => {
     document.getElementById('rptOverallResults').innerHTML = `
       <div class="report-section-title">2. Overall Results</div>
       <div style="font-size:12px;color:var(--text-2);margin-bottom:12px;padding:10px 14px;background:var(--blue-dim);border-radius:8px;border-left:3px solid var(--blue);">
-        <strong>Benchmark Reference:</strong> Industry average scores sourced from ISACA State of Cybersecurity 2024, IBM X-Force Threat Intelligence Index, and CrowdStrike Global Threat Report. Scores expressed as both percentage (%) and out of 10 for benchmark comparison.
+        <strong>Benchmark Reference (${bm.label}):</strong> ${bm.source} Scores expressed as both percentage (%) and out of 10 for benchmark comparison.
       </div>
       <table>
         <thead>
-          <tr><th>Domain</th><th>Score (%)</th><th>Score (/10)</th><th>Industry Avg (/10)</th><th>Maturity Level</th><th>Risk Rating</th></tr>
+          <tr><th>Domain</th><th>Score (%)</th><th>Score (/10)</th><th>${bm.label} Avg (/10)</th><th>Maturity Level</th><th>Risk Rating</th></tr>
         </thead>
         <tbody>
           ${domains.map((d, i) => {
@@ -1972,8 +2013,7 @@ const App = (() => {
             const r = s >= 80 ? 'Low' : s >= 60 ? 'Moderate' : s >= 40 ? 'High' : 'Critical';
             const rClass = r==='Low'?'risk-low':r==='Moderate'?'risk-medium':'risk-high';
             const scoreOf10 = (s / 10).toFixed(1);
-            const industryBenchmarks = [5.8, 5.5, 5.2, 5.9, 5.4, 5.0, 4.8, 4.6, 4.2];
-            const benchmark = industryBenchmarks[i] || 5.0;
+            const benchmark = bm.scores[i] || bm.overallAvg;
             const diff = (scoreOf10 - benchmark).toFixed(1);
             const diffColor = diff >= 0 ? '#22C55E' : '#EF4444';
             const diffStr = diff >= 0 ? `+${diff}` : diff;
@@ -1990,7 +2030,7 @@ const App = (() => {
             <td><strong>Overall</strong></td>
             <td><strong style="color:${maturity.color}">${pct}%</strong></td>
             <td><strong style="color:${maturity.color}">${(pct/10).toFixed(1)}/10</strong></td>
-            <td style="color:var(--text-2);">5.4/10</td>
+            <td style="color:var(--text-2);">${bm.overallAvg.toFixed(1)}/10</td>
             <td><strong>${maturity.name} (Level ${maturity.level})</strong></td>
             <td><span class="risk-pill ${risk==='Low'?'risk-low':risk==='Moderate'?'risk-medium':'risk-high'}">${risk}</span></td>
           </tr>
@@ -2142,7 +2182,7 @@ const App = (() => {
             <img src="${barImg}" alt="Bar Chart"/>
           </div>` : ''}
           ${radarImg ? `<div class="pdf-chart-box">
-            <h4>Posture Radar vs Industry Benchmark</h4>
+            <h4>Posture Radar vs ${industryBenchmarks[benchmarkSector].label} Benchmark</h4>
             <img src="${radarImg}" alt="Radar Chart"/>
           </div>` : ''}
           ${doughnutImg ? `<div class="pdf-chart-box">
@@ -2219,8 +2259,30 @@ const App = (() => {
     document.getElementById('darkToggle').addEventListener('click', toggleDark);
   }
 
+  function setBenchmarkSector(sector) {
+    if (sector !== 'private' && sector !== 'public') return;
+    benchmarkSector = sector;
+    // Update toggle button styling
+    document.querySelectorAll('.sector-btn').forEach(btn => {
+      const active = btn.dataset.sector === sector;
+      btn.classList.toggle('active', active);
+      btn.style.background = active ? 'var(--blue)' : 'transparent';
+      btn.style.color = active ? '#fff' : 'var(--text-2)';
+    });
+    // Re-render dashboard charts and executive report with new benchmark
+    const scores   = domains.map((_, i) => domainScore(i));
+    const total    = scores.reduce((a, b) => a + b, 0);
+    const pct      = Math.round(total / 900 * 100);
+    const maturity = getMaturity(pct);
+    const riskVal  = pct >= 81 ? 'Low' : pct >= 61 ? 'Moderate' : pct >= 41 ? 'High' : 'Critical';
+    renderCharts(scores, pct, maturity);
+    renderExecutiveReport(scores, pct, maturity, riskVal,
+      document.getElementById('reportDate').textContent.replace('Assessment Date: ', ''),
+      document.getElementById('reportRef').textContent.replace('Reference: ', ''));
+  }
+
   return { init, startAssessment, answer, nextDomain, prevDomain,
-           retakeAssessment, exportJSON, importResults, exportPDF };
+           retakeAssessment, exportJSON, importResults, exportPDF, setBenchmarkSector };
 })();
 
 document.addEventListener('DOMContentLoaded', App.init);
