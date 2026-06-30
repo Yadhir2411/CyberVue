@@ -886,10 +886,10 @@ tr:hover td { background: var(--surface-2); }
   <section class="hero">
     <div class="hero-badge">Cybersecurity Posture Assessment</div>
     <h1>CyberVue<br/><span>Baseline Assessment</span></h1>
-    <p class="hero-sub">Evaluate your organisation's cybersecurity posture across six critical security domains. Get an executive report in under 10 minutes.</p>
+    <p class="hero-sub">Evaluate your organisation's cybersecurity posture across nine critical security domains. Get an executive report in under 20 minutes.</p>
     <div class="hero-features">
-      <div class="hero-feature"><span class="check">✓</span> 60 Questions</div>
-      <div class="hero-feature"><span class="check">✓</span> 6 Security Domains</div>
+      <div class="hero-feature"><span class="check">✓</span> 90 Questions</div>
+      <div class="hero-feature"><span class="check">✓</span> 9 Security Domains</div>
       <div class="hero-feature"><span class="check">✓</span> Executive Report</div>
     </div>
     <button class="hero-cta" onclick="App.startAssessment()">
@@ -905,9 +905,9 @@ tr:hover td { background: var(--surface-2); }
 
   <!-- Stats strip -->
   <div class="stats-strip">
-    <div class="stat-item"><div class="stat-number">80</div><div class="stat-label">Questions</div></div>
-    <div class="stat-item"><div class="stat-number">8</div><div class="stat-label">Domains</div></div>
-    <div class="stat-item"><div class="stat-number">~15</div><div class="stat-label">Minutes</div></div>
+    <div class="stat-item"><div class="stat-number">90</div><div class="stat-label">Questions</div></div>
+    <div class="stat-item"><div class="stat-number">9</div><div class="stat-label">Domains</div></div>
+    <div class="stat-item"><div class="stat-number">~20</div><div class="stat-label">Minutes</div></div>
     <div class="stat-item"><div class="stat-number">5</div><div class="stat-label">Maturity Levels</div></div>
     <div class="stat-item"><div class="stat-number">∞</div><div class="stat-label">Insights</div></div>
   </div>
@@ -915,7 +915,7 @@ tr:hover td { background: var(--surface-2); }
   <!-- Domain cards -->
   <div class="landing-domains">
     <div class="section-label">Assessment Domains</div>
-    <h2 class="section-title">Eight Critical Security Areas</h2>
+    <h2 class="section-title">Nine Critical Security Areas</h2>
     <p class="section-sub">Each domain contains 10 questions, benchmarked against leading industry frameworks including NIST CSF, ISO 27001, CIS Controls, and SANS.</p>
     <div class="domain-grid" id="landingDomainCards"></div>
   </div>
@@ -949,7 +949,7 @@ tr:hover td { background: var(--surface-2); }
   <div class="progress-header">
     <div class="progress-meta">
       <div class="progress-meta-left">
-        <div class="domain-pill" id="domainPill">Domain 1 of 8</div>
+        <div class="domain-pill" id="domainPill">Domain 1 of 9</div>
         <div class="domain-title-sm" id="domainTitleSm">Governance &amp; Risk</div>
       </div>
       <div class="progress-meta-right" id="progressText">Question 1 of 80</div>
@@ -1021,7 +1021,7 @@ tr:hover td { background: var(--surface-2); }
     </div>
     <div class="chart-card">
       <h3>Posture Radar vs Industry Benchmark</h3>
-      <p class="chart-sub">Eight-domain coverage — scores out of 10 · Blue = UUW · Orange = Industry Average</p>
+      <p class="chart-sub">Nine-domain coverage — scores out of 10 · Blue = UUW · Orange = Industry Average</p>
       <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
     </div>
     <div class="chart-card">
@@ -1348,6 +1348,36 @@ const domains = [
       Q79: { title: "Adopt AI-Enhanced Predictive Analytics for Continuity",        detail: "Leverage AI tools to model failure scenarios, predict disruption likelihood, and optimise recovery strategies and resource allocation." },
       Q80: { title: "Incorporate Third-Party Dependencies into BC Planning",         detail: "Map critical supplier dependencies and include supply chain continuity scenarios in BIAs, BCPs, and tabletop exercises." }
     }
+  },
+  {
+    name: "ERP & SAP Security",
+    description: "SAP ECC and ERP platforms host the organisation's most sensitive financial, HR, and operational data. This domain addresses the unique security controls, authorisation frameworks, and threat vectors specific to SAP environments.",
+    icon: "🖥️",
+    color: "#059669",
+    questions: [
+      { id: "Q81", category: "Authorisation & Role Design",       text: "Are SAP roles and authorisation profiles designed and maintained using a least-privilege model to minimise Segregation of Duties (SoD) conflicts?" },
+      { id: "Q82", category: "Default & Emergency Users",         text: "Have default SAP users (SAP*, DDIC, EARLYWATCH) been secured or deactivated, and is emergency access (firefighter) controlled and logged?" },
+      { id: "Q83", category: "SAP GRC & SoD Management",          text: "Is an SAP GRC (Governance, Risk and Compliance) or equivalent tool in place to continuously monitor and remediate SoD violations and access risks?" },
+      { id: "Q84", category: "Basis & System Security",           text: "Are SAP Basis security configurations hardened, including secure RFC connections, trusted system controls, and Secure Network Communications (SNC)?" },
+      { id: "Q85", category: "Patch & Kernel Management",         text: "Are SAP kernel updates, security notes, and patches applied in a timely manner in line with SAP's patch release cycle?" },
+      { id: "Q86", category: "Transport Management Security",     text: "Is the SAP Change and Transport System (CTS) secured with segregation between development, quality assurance, and production environments?" },
+      { id: "Q87", category: "SAP Audit & Security Logging",      text: "Is the SAP Security Audit Log (SM19/SM20) enabled and configured to capture critical events, and are logs reviewed and integrated with the SIEM?" },
+      { id: "Q88", category: "Interface & Integration Security",  text: "Are SAP interfaces, RFC connections, BAPIs, IDocs, and APIs reviewed and restricted to only authorised systems and users?" },
+      { id: "Q89", category: "SAP Data Protection",               text: "Is sensitive financial, payroll, and personal data within SAP ECC classified, access-restricted, and protected in line with data protection requirements?" },
+      { id: "Q90", category: "SAP Threat Detection",              text: "Are AI-driven or automated tools (e.g. SAP Enterprise Threat Detection) deployed to monitor SAP environments for anomalous user behaviour and attacks?" }
+    ],
+    recommendations: {
+      Q81: { title: "Implement Least-Privilege SAP Role Design and SoD Controls",        detail: "Redesign SAP roles using a least-privilege model. Conduct a full SoD conflict analysis using SAP GRC Access Control or equivalent tooling, and remediate high-risk violations." },
+      Q82: { title: "Secure or Deactivate SAP Default and Emergency Users",              detail: "Immediately change passwords for SAP* and DDIC, disable EARLYWATCH, and implement a firefighter (emergency access) process with full session logging and post-use review." },
+      Q83: { title: "Deploy SAP GRC for Continuous Access Risk Management",              detail: "Implement SAP GRC Access Control to automate SoD monitoring, access request workflows, and periodic user access reviews across the SAP landscape." },
+      Q84: { title: "Harden SAP Basis Configurations to SAP Security Baseline",          detail: "Apply SAP Security Baseline Template configurations, restrict RFC connections to trusted systems only, enable SNC for encrypted communications, and remove unnecessary services." },
+      Q85: { title: "Establish a Timely SAP Patching and Security Note Programme",       detail: "Subscribe to SAP Security Patch Day notifications, assess and apply critical security notes within 30 days, and maintain a patching register aligned to SAP's monthly release cycle." },
+      Q86: { title: "Enforce Segregation in the SAP Transport Landscape",                detail: "Restrict developer access to production, enforce dual-approval controls for transports, and audit CTS logs to detect unauthorised changes in the production environment." },
+      Q87: { title: "Enable and Monitor the SAP Security Audit Log",                     detail: "Configure SM19 to capture critical events (failed logins, authorisation failures, RFC calls, user changes) and integrate SM20 logs with the SIEM for real-time alerting." },
+      Q88: { title: "Audit and Restrict SAP Interface and RFC Connections",              detail: "Perform a full RFC connection review, remove or restrict unnecessary trusted connections, enforce authentication on all interfaces, and document approved integration paths." },
+      Q89: { title: "Classify and Restrict Access to Sensitive SAP Data",               detail: "Identify and classify sensitive data within SAP (payroll, financial postings, HR master data), apply strict authorisation controls, and ensure compliance with POPIA and GDPR obligations." },
+      Q90: { title: "Deploy SAP Enterprise Threat Detection or Equivalent",             detail: "Implement SAP ETD or a SIEM-integrated SAP security monitoring solution to detect anomalous transactions, privilege escalation, and known SAP attack patterns in real time." }
+    }
   }
 ];
 
@@ -1436,7 +1466,7 @@ const App = (() => {
     c.innerHTML = domains.map((d, i) => `
       <div class="domain-card">
         <div class="domain-icon" style="background:${d.color}22;color:${d.color};">${d.icon}</div>
-        <div class="domain-num">Domain ${i+1} of 8</div>
+        <div class="domain-num">Domain ${i+1} of 9</div>
         <h3>${d.name}</h3>
         <p>${d.description}</p>
         <div class="domain-q-count">10 Questions</div>
@@ -1450,11 +1480,11 @@ const App = (() => {
   }
   function renderDomain() {
     const d = domains[currentDomain];
-    const total = 80;
+    const total = 90;
     const answered = totalAnswered();
     const pct = Math.round(answered / total * 100);
     // Pill + title
-    document.getElementById('domainPill').textContent = `Domain ${currentDomain+1} of 8`;
+    document.getElementById('domainPill').textContent = `Domain ${currentDomain+1} of 9`;
     document.getElementById('domainTitleSm').textContent = d.name;
     document.getElementById('progressText').textContent = `Question ${answered} of ${total} answered`;
     document.getElementById('progressFill').style.width = pct + '%';
@@ -1497,7 +1527,7 @@ const App = (() => {
     }).join('');
     // Nav buttons
     document.getElementById('btnPrevDomain').style.visibility = currentDomain === 0 ? 'hidden' : 'visible';
-    const isLast = currentDomain === 7;
+    const isLast = currentDomain === 8;
     const btn = document.getElementById('btnNextDomain');
     const domainAnswered = answeredInDomain(currentDomain);
     if (isLast) {
@@ -1529,7 +1559,7 @@ const App = (() => {
     }
     // Update progress
     const answered = totalAnswered();
-    const pct = Math.round(answered / 80 * 100);
+    const pct = Math.round(answered / 90 * 100);
     document.getElementById('progressFill').style.width = pct + '%';
     document.getElementById('progressText').textContent = `Question ${answered} of 80 answered`;
     document.getElementById('qIndicator').textContent = `${answeredInDomain(currentDomain)}/10 answered`;
@@ -1540,7 +1570,7 @@ const App = (() => {
     }
   }
   function nextDomain() {
-    if (currentDomain < 7) {
+    if (currentDomain < 8) {
       currentDomain++;
       renderDomain();
       window.scrollTo(0, 0);
@@ -1571,13 +1601,13 @@ const App = (() => {
 
     const scores   = domains.map((_, i) => domainScore(i));
     const total    = scores.reduce((a, b) => a + b, 0);
-    const maxTotal = 800;
+    const maxTotal = 900;
     const pct      = Math.round(total / maxTotal * 100);
     const maturity = getMaturity(pct);
 
     // Count passing domains (≥60)
     const passing  = scores.filter(s => s >= 60).length;
-    const needAttn = 8 - passing;
+    const needAttn = 9 - passing;
 
     // Risk rating
     const riskMap = { 5:'Optimized', 4:'Low', 3:'Moderate', 2:'High', 1:'Critical' };
@@ -1616,8 +1646,8 @@ const App = (() => {
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Completion</div>
-        <div class="kpi-value">${Math.round(Object.keys(responses).length / 80 * 100)}%</div>
-        <div class="kpi-sub">${Object.keys(responses).length} of 80 questions answered</div>
+        <div class="kpi-value">${Math.round(Object.keys(responses).length / 90 * 100)}%</div>
+        <div class="kpi-sub">${Object.keys(responses).length} of 90 questions answered</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Domains Passing</div>
@@ -1670,8 +1700,8 @@ const App = (() => {
     // Radar chart — scores expressed as /10, with industry benchmark overlay
     const radarScores = scores.map(s => +(s / 10).toFixed(1));
     // Industry benchmark averages per domain (out of 10), based on global cybersecurity maturity studies
-    // (ISACA State of Cybersecurity 2024, IBM X-Force, CrowdStrike Global Threat Report)
-    const benchmarkScores = [5.8, 5.5, 5.2, 5.9, 5.4, 5.0, 4.8, 4.6];
+    // (ISACA State of Cybersecurity 2024, IBM X-Force, CrowdStrike Global Threat Report, SAP-CERT / DSAG Audit Guide)
+    const benchmarkScores = [5.8, 5.5, 5.2, 5.9, 5.4, 5.0, 4.8, 4.6, 4.2];
     const radarLabels = domains.map(d => d.name.length > 15 ? d.name.split(' ').slice(0,2).join(' ') : d.name);
     charts.radar = new Chart(document.getElementById('radarChart'), {
       type: 'radar',
@@ -1916,7 +1946,7 @@ const App = (() => {
       `<br/><br/>` +
       `<strong>${topDomain.name}</strong> demonstrated the strongest performance with a score of <strong>${scores[domains.indexOf(topDomain)]}%</strong> (${+(scores[domains.indexOf(topDomain)]/10).toFixed(1)}/10), indicating established controls in this area. ` +
       `<strong>${bottomDomain.name}</strong> presented the most significant opportunity for improvement with a score of <strong>${scores[domains.indexOf(bottomDomain)]}%</strong> (${+(scores[domains.indexOf(bottomDomain)]/10).toFixed(1)}/10), requiring prioritised attention. ` +
-      `Overall, <strong>${passing} of 8 domains</strong> achieved a score at or above the 60% adequacy threshold. ` +
+      `Overall, <strong>${passing} of 9 domains</strong> achieved a score at or above the 60% adequacy threshold. ` +
       `The organisation's overall cybersecurity risk rating is assessed as <strong>${risk}</strong>. ` +
       `<br/><br/>` +
       `The recommendations contained in this report are ranked by severity and should be reviewed by the leadership team and incorporated into the organisation's cybersecurity improvement roadmap. Addressing the identified gaps will move UUW toward a stronger alignment with industry best practice and the requirements of the above-mentioned frameworks.`;
@@ -1942,7 +1972,7 @@ const App = (() => {
             const r = s >= 80 ? 'Low' : s >= 60 ? 'Moderate' : s >= 40 ? 'High' : 'Critical';
             const rClass = r==='Low'?'risk-low':r==='Moderate'?'risk-medium':'risk-high';
             const scoreOf10 = (s / 10).toFixed(1);
-            const industryBenchmarks = [5.8, 5.5, 5.2, 5.9, 5.4, 5.0, 4.8, 4.6];
+            const industryBenchmarks = [5.8, 5.5, 5.2, 5.9, 5.4, 5.0, 4.8, 4.6, 4.2];
             const benchmark = industryBenchmarks[i] || 5.0;
             const diff = (scoreOf10 - benchmark).toFixed(1);
             const diffColor = diff >= 0 ? '#22C55E' : '#EF4444';
@@ -1990,7 +2020,7 @@ const App = (() => {
           <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
             <div>
               <div class="report-domain-name">${d.icon} ${d.name}</div>
-              <div style="font-size:12px;color:var(--text-2);">Domain ${i+1} of 8 — ${yesCount} Yes · ${partialCount} Partial · ${noCount} No</div>
+              <div style="font-size:12px;color:var(--text-2);">Domain ${i+1} of 9 — ${yesCount} Yes · ${partialCount} Partial · ${noCount} No</div>
             </div>
             <div class="report-domain-score" style="color:${m.color};">${s}% <span style="font-size:14px;font-weight:600;">— ${m.name}</span></div>
           </div>
@@ -2173,7 +2203,7 @@ const App = (() => {
     if (!document.getElementById('dashboardPage').classList.contains('hidden')) {
       const scores = domains.map((_, i) => domainScore(i));
       const total  = scores.reduce((a,b) => a+b, 0);
-      const pct    = Math.round(total / 800 * 100);
+      const pct    = Math.round(total / 900 * 100);
       const mat    = getMaturity(pct);
       renderCharts(scores, pct, mat);
     }
